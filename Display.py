@@ -76,14 +76,27 @@ def birthBeforeMarriage(db):
         person = dict(zip(['iid', 'birthday', 'alive', 'death', 'marrydate', 'divorcedate','name','mid'], i))
         if person['birthday'] and person['marrydate']:
             if person['birthday'] >= person['marrydate']:
-                print(f"Error US02: Birth date of {person['name']}({person['iid']}) occurs after his marriage date in family ({person['mid']}).")
+                print(f"Error US02: Birth date of {person['name']}({person['iid']}) occurs after his/her marriage date in family ({person['mid']}).")
         #print(person)
+def marriageBeforeDeath(db):
+    marriageanddeathquery = """
+    SELECT
+        i.iid, i.death, m.marrydate, i.name, m.mid
+    FROM individuals i LEFT JOIN
+        marriages m ON i.iid=m.hid OR i.iid=m.wid
+    """
+    for i in db.query(marriageanddeathquery):
+        person=dict(zip(['iid','death','marrydate','name','mid'],i))
+        if person['death'] and person['marrydate']:
+            if person['marrydate']>=person['death']:
+                print(f"Error US05: Marriage date of {person['name']}({person['iid']}) occurs after his/her death date in family ({person['mid']}).")
 
 def display(db):
     # Display SQL tables...
     # populateAge(db)
-    # displaySQLTables(db)
-    birthBeforeMarriage(db)
+    displaySQLTables(db)
+    # birthBeforeMarriage(db)
+    # marriageBeforeDeath(db)
     # userStory()
 
 if __name__ == "__main__":

@@ -5,6 +5,7 @@ import Database
 import schema
 import datetime
 from prettytable import PrettyTable
+from dateutils import relativedelta
 
 
 def populateAge(db):
@@ -101,7 +102,44 @@ def birthBeforeDeath(db):
 
 def divorceBeforeDeath(db):
     #US06
-    print("this does divorce before death")
+    divorceAndDeathQuery = """
+    SELECT
+        i.iid, i.death, m.marrydate, i.name, m.mid, m.divorced, m.divorcedate
+    FROM individuals i LEFT JOIN
+        marriages m ON i.iid=m.hid OR i.iid=m.wid
+    """
+    for i in db.query(divorceAndDeathQuery):
+        person=dict(zip(['iid','death','marrydate','name','mid','divorced','divorcedate'],i))
+        if person['death'] and person['divorced']:
+            if person['divorcedate']>=person['death']:
+                print(f"Error US06: Divorce date of {person['name']}({person['iid']}) occurs after his/her death date in family ({person['mid']}).")
+
+def lessThan150(db):
+    currentDate = datetime.datetime.now()
+    for i in db.query("SELECT * FROM individuals"):
+        person = dict(zip(schema.COLUMNS['individuals'], i))
+        yearsDiff = relativedelta.relativedelta(datetime.datetime.now(), birthDate).years
+        if (yearsDiff > 150):
+            print("Error US01: " + person['name'] + "(" + person['iid'] + ") is older than 150 years old!")
+        elif (yearsDiff < 0):
+            print("Error US01: " + person['name'] + "(" + person['iid'] + ") is less than 0 years old!")
+        yearsDiff = relativedelta.relativedelta(person['death'], person['birth'])
+        if (yearsDiff > 150):
+            print("Error US01: " + person['name'] + "(" + person['iid'] + ") lived longer than 150 years!")
+
+def datesBeforeCurrent(db):
+    currentDate = datetime.datetime.now()
+    for i in db.query("SELECT * FROM individuals"):
+        person = dict(zip(schema.COLUMNS['individuals'], i))
+        if (person['birth'] and person['birth'] > currentDate):
+            print("Error US02: " + person['name'] + "(" + person['iid'] + ") 's birth comes after today's date!")
+        elif (person['death'] and person['death'] > currentDate):
+            print("Error US02: " + person['name'] + "(" + person['iid'] + ") 's death comes after today's date!")
+        elif (person['marriage'] and person['marriage'] > currentDate):
+            print("Error US02: " + person['name'] + "(" + person['iid'] + ") 's marriage comes after today's date!")
+        elif (person['divorce'] and person['divorce'] > currentDate):
+            print("Error US02: " + person['name'] + "(" + person['iid'] + ") 's divorce comes after today's date!")
+
 
 def marriageBeforeDivorce(db):
     for m in db.query("SELECT * FROM marriages"):
@@ -129,7 +167,8 @@ def display(db):
     # displaySQLTables(db)
     # birthBeforeMarriage(db)
     # marriageBeforeDeath(db)
-    # userStory()
+    #birthBeforeDeath(db)
+    #divorceBeforeDeath(db)
 
 if __name__ == "__main__":
     db = Database.Database(rebuild=False)

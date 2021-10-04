@@ -1,5 +1,6 @@
 # The database tables are displayed, each user story is called
 
+from typing import NoReturn
 import Database
 import schema
 import datetime
@@ -67,13 +68,16 @@ def birthBeforeMarriage(db):
     # We want a list of people, with the day they were born, and the day they were married
     marriagesQuery = """
     SELECT 
-        i.iid, i.birthday, i.alive, i.death, m.marrydate, m.divorcedate
+        i.iid, i.birthday, i.alive, i.death, m.marrydate, m.divorcedate, i.name, m.mid
     FROM individuals i LEFT JOIN 
         marriages m ON i.iid=m.hid OR i.iid=m.wid
     """
     for i in db.query(marriagesQuery):
-        person = dict(zip(['iid', 'birthday', 'alive', 'death', 'marrydate', 'divorcedate'], i))
-        print(person)
+        person = dict(zip(['iid', 'birthday', 'alive', 'death', 'marrydate', 'divorcedate','name','mid'], i))
+        if person['birthday'] and person['marrydate']:
+            if person['birthday'] >= person['marrydate']:
+                print(f"Error US02: Birth date of {person['name']}({person['iid']}) occurs after his marriage date in family ({person['mid']}).")
+        #print(person)
 
 def display(db):
     # Display SQL tables...

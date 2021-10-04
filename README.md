@@ -32,6 +32,6 @@ This is where the families and individuals tables are displayed, and where user 
 ## How to run
 
 ```shell
-  $ pip python3 .\\GEDCOMvalidator.py validate path-to-GEDCOM-file 
+  $ python3 .\GEDCOMvalidator.py validate path-to-GEDCOM-file 
 ```
 

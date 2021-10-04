@@ -103,10 +103,30 @@ def divorceBeforeDeath(db):
     #US06
     print("this does divorce before death")
 
+def marriageBeforeDivorce(db):
+    for m in db.query("SELECT * FROM marriages"):
+        marriage = dict(zip(schema.COLUMNS['marriages'], m))
+        if marriage['marrydate'] and marriage['divorcedate'] and marriage['marrydate'] > marriage['divorcedate']:
+            print(f"Error US04: Family {marriage['mid']} divorced before they married.")
+
+def birthBeforeMarriageOfParents(db):
+    query = """
+    SELECT
+        i.iid, i.name, i.birthday, m.mid, m.marrydate, i.parentmarriage
+    FROM individuals i LEFT JOIN
+        marriages m ON i.parentmarriage=m.mid
+    """
+    for i in db.query(query):
+        person = dict(zip(['iid', 'name', 'birthday', 'mid', 'marrydate', 'parentmarriage'], i))
+        if person['birthday'] and person['marrydate'] and person['birthday'] < person['marrydate']:
+            print(f"Anomaly US08: Birth date of {person['name']} ({person['iid']}) occurs before the marriage date of his parents in Family {person['mid']}.")
+
 def display(db):
     # Display SQL tables...
-    # populateAge(db)
-    displaySQLTables(db)
+    populateAge(db)
+    marriageBeforeDivorce(db)
+    birthBeforeMarriageOfParents(db)
+    # displaySQLTables(db)
     # birthBeforeMarriage(db)
     # marriageBeforeDeath(db)
     # userStory()

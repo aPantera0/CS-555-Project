@@ -101,7 +101,18 @@ def birthBeforeDeath(db):
 
 def divorceBeforeDeath(db):
     #US06
-    print("this does divorce before death")
+    divorceAndDeathQuery = """
+    SELECT
+        i.iid, i.death, m.marrydate, i.name, m.mid, m.divorced, m.divorcedate
+    FROM individuals i LEFT JOIN
+        marriages m ON i.iid=m.hid OR i.iid=m.wid
+    """
+    for i in db.query(divorceAndDeathQuery):
+        person=dict(zip(['iid','death','marrydate','name','mid','divorced','divorcedate'],i))
+        if person['death'] and person['divorced']:
+            if person['divorcedate']>=person['death']:
+                print(f"Error US06: Divorce date of {person['name']}({person['iid']}) occurs after his/her death date in family ({person['mid']}).")
+
 
 def display(db):
     # Display SQL tables...
@@ -109,7 +120,8 @@ def display(db):
     displaySQLTables(db)
     # birthBeforeMarriage(db)
     # marriageBeforeDeath(db)
-    # userStory()
+    #birthBeforeDeath(db)
+    #divorceBeforeDeath(db)
 
 if __name__ == "__main__":
     db = Database.Database(rebuild=False)

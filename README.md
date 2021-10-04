@@ -29,9 +29,27 @@ Every person and family is read into the SQL tables. Error checking, Anomaly che
 
 The SQL tables for the individuals and families are displayed. Each user story is called. 
 
+## First time setup
+
+Ubuntu 20
+
+```shell
+  $ sudo apt update
+  $ sudo apt-get install python3 python3-pip mysql-server
+  $ pip3 install mysql-connector-python prettytable python-dotenv
+  $ sudo service mysql start
+  $ sudo mysql_secure_installation
+  $ sudo mysql
+  mysql> CREATE USER 'GEDCOM'@'localhost' IDENTIFIED BY 'create-a-password';
+  mysql> GRANT ALL PRIVILEGES ON * . * TO 'GEDCOM'@'localhost';
+  mysql> FLUSH PRIVILEGES;
+  mysql> quit
+  $ echo "MYSQL_PASSWORD=create-a-password" >> .env
+```
+
 ## How to run
 
 ```shell
-  $ python3 GEDCOMvalidator.py validate path-to-GEDCOM-file 
+  $ python3 GEDCOMvalidator.py path-to-GEDCOM-file 
 ```
 

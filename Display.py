@@ -12,6 +12,7 @@ def userStory():
 def populateAge(db):
     for i in db.query("SELECT * FROM individuals"):
         person = dict(zip(schema.COLUMNS['individuals'], i))
+        # person is a dictionary, keys are the field names in schema.py, and the values are the values in the database for that person
         if not person['age']:
             birth = person['birthday']
             if not person['alive']:
@@ -62,11 +63,23 @@ def displaySQLTables(db):
     mt.add_rows(db.query(marriagesQuery))
     print('Individuals', it, 'Families', mt, sep='\n')
 
+def birthBeforeMarriage(db):
+    # We want a list of people, with the day they were born, and the day they were married
+    marriagesQuery = """
+    SELECT 
+        i.iid, i.birthday, i.alive, i.death, m.marrydate, m.divorcedate
+    FROM individuals i LEFT JOIN 
+        marriages m ON i.iid=m.hid OR i.iid=m.wid
+    """
+    for i in db.query(marriagesQuery):
+        person = dict(zip(['iid', 'birthday', 'alive', 'death', 'marrydate', 'divorcedate'], i))
+        print(person)
 
 def display(db):
     # Display SQL tables...
-    populateAge(db)
-    displaySQLTables(db)
+    # populateAge(db)
+    # displaySQLTables(db)
+    birthBeforeMarriage(db)
     # userStory()
 
 if __name__ == "__main__":

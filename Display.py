@@ -7,9 +7,6 @@ import datetime
 from prettytable import PrettyTable
 
 
-def userStory():
-    print("This is a user story")
-
 def populateAge(db):
     for i in db.query("SELECT * FROM individuals"):
         person = dict(zip(schema.COLUMNS['individuals'], i))
@@ -90,6 +87,21 @@ def marriageBeforeDeath(db):
         if person['death'] and person['marrydate']:
             if person['marrydate']>=person['death']:
                 print(f"Error US05: Marriage date of {person['name']}({person['iid']}) occurs after his/her death date in family ({person['mid']}).")
+
+def birthBeforeDeath(db):
+    #US03
+    #gets the data from the DB
+    for i in db.query("SELECT * FROM individuals"):
+        person = dict(zip(schema.COLUMNS['individuals'], i))
+        #checks if birthday and death day exist, and evaluates both
+        if person['birthday'] and person['death'] and person['birthday'] < person['death']:
+            print("Error US03: Birth date of " + person['name'] + " (" + person['iid'] + ") occurs after their death date.")
+    print("this does birth before death")
+
+
+def divorceBeforeDeath(db):
+    #US06
+    print("this does divorce before death")
 
 def display(db):
     # Display SQL tables...

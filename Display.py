@@ -5,6 +5,7 @@ import Database
 import schema
 import datetime
 from prettytable import PrettyTable
+from dateutils import relativedelta
 
 
 def populateAge(db):
@@ -112,6 +113,32 @@ def divorceBeforeDeath(db):
         if person['death'] and person['divorced']:
             if person['divorcedate']>=person['death']:
                 print(f"Error US06: Divorce date of {person['name']}({person['iid']}) occurs after his/her death date in family ({person['mid']}).")
+
+def lessThan150(db):
+    currentDate = datetime.datetime.now()
+    for i in db.query("SELECT * FROM individuals"):
+        person = dict(zip(schema.COLUMNS['individuals'], i))
+        yearsDiff = relativedelta.relativedelta(datetime.datetime.now(), birthDate).years
+        if (yearsDiff > 150):
+            print("Error US01: " + person['name'] + "(" + person['iid'] + ") is older than 150 years old!")
+        elif (yearsDiff < 0):
+            print("Error US01: " + person['name'] + "(" + person['iid'] + ") is less than 0 years old!")
+        yearsDiff = relativedelta.relativedelta(person['death'], person['birth'])
+        if (yearsDiff > 150):
+            print("Error US01: " + person['name'] + "(" + person['iid'] + ") lived longer than 150 years!")
+
+def datesBeforeCurrent(db):
+    currentDate = datetime.datetime.now()
+    for i in db.query("SELECT * FROM individuals"):
+        person = dict(zip(schema.COLUMNS['individuals'], i))
+        if (person['birth'] and person['birth'] > currentDate):
+            print("Error US02: " + person['name'] + "(" + person['iid'] + ") 's birth comes after today's date!")
+        elif (person['death'] and person['death'] > currentDate):
+            print("Error US02: " + person['name'] + "(" + person['iid'] + ") 's death comes after today's date!")
+        elif (person['marriage'] and person['marriage'] > currentDate):
+            print("Error US02: " + person['name'] + "(" + person['iid'] + ") 's marriage comes after today's date!")
+        elif (person['divorce'] and person['divorce'] > currentDate):
+            print("Error US02: " + person['name'] + "(" + person['iid'] + ") 's divorce comes after today's date!")
 
 
 def display(db):

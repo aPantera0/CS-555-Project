@@ -1,6 +1,4 @@
-# Author: Andrew Pantera
-# For CS 555 Fall 2021
-# Project 02
+# Read command line paramaters, call ingest and display
 
 import argparse
 import functools
@@ -95,3 +93,12 @@ if __name__ == "__main__":
     args.func(args)
 
 # run with python3 .\GEDCOMvalidator.py validate ./My-Family-19-Sep-2021-212321671.ged > out.txt
+
+def myFun():
+    for person in personstable():
+        if person is orphan:
+            print the bitch
+
+
+def main():
+    myFun()

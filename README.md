@@ -23,15 +23,15 @@ This system will be run from the command line with one command line parameter: t
 
 1. Ingest
 
-This is where user stories for validation are implemented, like catching errors, catching anomalies, and enforcing rules.
+Every person and family is read into the SQL tables. Error checking, Anomaly checking, and user stories are not implemented here.
 
 2. Display
 
-This is where the families and individuals tables are displayed, and where user stories that involve listing things like orphans are done.
+The SQL tables for the individuals and families are displayed. Each user story is called. 
 
 ## How to run
 
 ```shell
-  $ python3 .\GEDCOMvalidator.py validate path-to-GEDCOM-file 
+  $ python3 GEDCOMvalidator.py validate path-to-GEDCOM-file 
 ```
 

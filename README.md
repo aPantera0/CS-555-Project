@@ -47,8 +47,6 @@ Ubuntu 20
   $ echo "MYSQL_PASSWORD=create-a-password" >> .env
 ```
 
-Alternatively you can create a new mysql user and password just for this application by populating the MYSQL_USER field in the .env file
-
 ## How to run
 
 ```shell

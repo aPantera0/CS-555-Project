@@ -36,7 +36,7 @@ Ubuntu 20
 ```shell
   $ sudo apt update
   $ sudo apt-get install python3 python3-pip mysql-server
-  $ pip3 install mysql-connector-python prettytable
+  $ pip3 install mysql-connector-python prettytable python-dotenv
   $ sudo service mysql start
   $ sudo mysql_secure_installation
   $ sudo mysql
@@ -50,7 +50,7 @@ Ubuntu 20
 ## How to run
 
 ```shell
-  $ python3 GEDCOMvalidator.py validate path-to-GEDCOM-file 
+  $ python3 GEDCOMvalidator.py path-to-GEDCOM-file 
 ```
 
 ## Notes

@@ -1,13 +1,3 @@
-<<<<<<< HEAD
-# The database tables are displayed, each user story is called
-
-def userStory():
-    print("I've done a user story")
-
-def Display():
-    # Display SQL tables...
-    userStory()
-=======
 # The database tables are displayed, each user story is called
 
 import Database
@@ -82,4 +72,3 @@ def display(db):
 if __name__ == "__main__":
     db = Database.Database(rebuild=False)
     display(db)
->>>>>>> 7813fd925b688e968fde90b4c40a1265c4af1c01

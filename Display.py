@@ -145,7 +145,6 @@ def divorceBeforeDeath(db):
 
 def lessThan150(db):
     #US07
-    currentDate = datetime.datetime.now()
     for i in db.query("SELECT * FROM individuals"):
         person = dict(zip(schema.COLUMNS['individuals'], i))
         yearsDiff = yearsBetween(person['birthday'],  person['death'] if person['death'] else datetime.datetime.today().date()) 

@@ -1,4 +1,5 @@
 # Read command line paramaters, call ingest and display
+# This is the main file for running this project
 
 import Ingest
 import Database

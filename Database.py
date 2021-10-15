@@ -1,3 +1,7 @@
+# Manages a database object. This way we don't need to connect
+# a new database cursor in every environment we use the database,
+# we can just pass around an object of this class. 
+
 import mysql.connector
 from dotenv import load_dotenv
 import os

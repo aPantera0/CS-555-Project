@@ -8,7 +8,7 @@ import os
 import schema
 
 class Database:
-    def __init__(self, verbose: bool = False, rebuild = True):
+    def __init__(self, verbose: bool = False, rebuild: bool = True):
        
         load_dotenv()
 
@@ -20,6 +20,9 @@ class Database:
         )
         self.cursor = self.db.cursor()
 
+        self.build(verbose, rebuild)
+    
+    def build(self, verbose: bool = False, rebuild: bool = True):
         if rebuild:
             try:
                 self.cursor.execute("DROP DATABASE GEDCOM")
@@ -34,7 +37,7 @@ class Database:
             if verbose:
                 print(f"Creating table {table_name}...")
             self.cursor.execute(build_sql)
-    
+
     def query(self, query_string):
         self.cursor.execute(query_string)
         return self.cursor.fetchall()
@@ -42,7 +45,6 @@ class Database:
     def constrain(self):
         for constraint in schema.CONSTRAINTS:
             self.cursor.execute(constraint)
-
 
     def teardown(self):
         self.cursor.execute("DROP DATABASE GEDCOM")

@@ -166,6 +166,50 @@ def birthBeforeMarriageOfParents(db):
         if person['birthday'] and person['marrydate'] and person['birthday'] < person['marrydate']:
             print(f"Anomaly US08: Birth date of {person['name']} ({person['iid']}) occurs before the marriage date of their parents in Family {person['mid']}.")
 
+def parentsNotTooOld(db):
+    #US12
+    # Mother should be less than 60 years older than her children and father should be less than 80 years older than his children
+    # Creates an Error
+    query = """
+    SELECT
+        c.birthday as child_bday, h.birthday as father_bday, w.birthday as mother_bday, h.iid as hid, w.iid as wid, h.name as hname, w.name as wname, c.iid as cid, c.name as cname, m.mid
+    FROM marriages m LEFT JOIN
+        individuals c ON c.parentmarriage=m.mid
+    LEFT JOIN 
+        individuals h on m.hid=h.iid 
+    LEFT JOIN 
+        individuals w on m.wid=w.iid 
+    WHERE c.birthday IS NOT NULL
+    """
+    for i in db.query(query):
+        person = dict(zip(['child_bday', 'father_bday', 'mother_bday', 'hid', 'wid', 'hname', 'wname', 'cid', 'cname', 'mid'], i))
+        if person['father_bday'] and yearsBetween(person['father_bday'], person['child_bday']) > 80:
+            print(f"Anomaly US12: Father {person['hname']} ({person['hid']}) is more than 80 years ({yearsBetween(person['father_bday'], person['child_bday'])}) older than his child {person['cname']} ({person['cid']}) of family {person['mid']}.")
+        if person['mother_bday'] and yearsBetween(person['mother_bday'], person['child_bday']) > 60:
+            print(f"Anomaly US12: Mother {person['wname']} ({person['wid']}) is more than 60 years ({yearsBetween(person['mother_bday'], person['child_bday'])}) older than his child {person['cname']} ({person['cid']}) of family {person['mid']}.")
+
+
+def maleLastNames(db):
+    #US16
+    # All male members of a family should have the same last name
+    # Creates an Anomoly 
+    query = """
+    SELECT
+        c.name, c.iid, h.name, h.iid, m.mid
+    FROM marriages m LEFT JOIN
+        individuals c ON c.parentmarriage=m.mid
+    LEFT JOIN 
+        individuals h on m.hid=h.iid 
+    WHERE c.gender='M' AND c.name IS NOT NULL AND h.name IS NOT NULL
+    """
+    for i in db.query(query):
+        person = dict(zip(['son_name', 'son_id', 'father_name', 'father_id', 'mid'], i))
+        son_last = person['son_name'].split('/')[1]
+        father_last = person['father_name'].split('/')[1]
+        if son_last != father_last:
+            print(f"Anomaly US16: Son {person['son_name']} ({person['son_id']}) doesn't have the same last name as his father {person['father_name']} ({person['father_id']}) of family {person['mid']}.")
+
+
 def display(db):
     # Display SQL tables...
     populateAge(db)
@@ -173,14 +217,19 @@ def display(db):
 
     # Run user stories...
     # Sprint 1
-    datesBeforeCurrent(db)
-    birthBeforeMarriage(db)
-    birthBeforeDeath(db)
-    marriageBeforeDivorce(db)
-    marriageBeforeDeath(db)
-    divorceBeforeDeath(db)
-    lessThan150(db)
-    birthBeforeMarriageOfParents(db)
+    # datesBeforeCurrent(db)
+    # birthBeforeMarriage(db)
+    # birthBeforeDeath(db)
+    # marriageBeforeDivorce(db)
+    # marriageBeforeDeath(db)
+    # divorceBeforeDeath(db)
+    # lessThan150(db)
+    # birthBeforeMarriageOfParents(db)
+
+    # Run user stories...
+    # Sprint 2
+    # parentsNotTooOld(db)
+    # maleLastNames(db)
 
 if __name__ == "__main__":
     db = Database.Database(rebuild=False)

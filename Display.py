@@ -166,6 +166,11 @@ def birthBeforeMarriageOfParents(db):
         if person['birthday'] and person['marrydate'] and person['birthday'] < person['marrydate']:
             print(f"Anomaly US08: Birth date of {person['name']} ({person['iid']}) occurs before the marriage date of their parents in Family {person['mid']}.")
 
+def marriageAfter14(db):
+    #US10: Marriage after 14
+    #Marriage should be at least 14 years after birth of both spouses (parents must be at least 14 years old)
+    pass
+
 def parentsNotTooOld(db):
     #US12
     # Mother should be less than 60 years older than her children and father should be less than 80 years older than his children
@@ -188,6 +193,10 @@ def parentsNotTooOld(db):
         if person['mother_bday'] and yearsBetween(person['mother_bday'], person['child_bday']) > 60:
             print(f"Anomaly US12: Mother {person['wname']} ({person['wid']}) is more than 60 years ({yearsBetween(person['mother_bday'], person['child_bday'])}) older than his child {person['cname']} ({person['cid']}) of family {person['mid']}.")
 
+def multipleBirthsCap(db):
+    #US14
+    #No more than five siblings should be born at the same time
+    pass
 
 def maleLastNames(db):
     #US16

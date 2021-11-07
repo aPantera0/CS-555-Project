@@ -279,6 +279,18 @@ def fewerThanFifteenSiblings(db):
         if siblings >= 15:
             print(f"Anomaly US15: {name} ({key}) has 15 or more siblings.")
 
+    # query = """
+    #     SELECT f.mid
+    #     FROM individuals i, marriages f
+    #     WHERE i.parentmarriage = f.mid
+    #     GROUP BY f.mid
+    #     HAVING COUNT(*)>=15
+    # """
+    # for i in db.query(query):
+    #     fam = dict(zip(['mid'],i))
+    #     if fam['mid']:
+    #         print(f"Anomaly US15: Family {fam['mid']} has 15 or more siblings")
+
 
 
 def maleLastNames(db):

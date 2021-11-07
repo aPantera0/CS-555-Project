@@ -171,6 +171,53 @@ def marriageAfter14(db):
     #Marriage should be at least 14 years after birth of both spouses (parents must be at least 14 years old)
     pass
 
+def noBigAmy(db):
+    #US11
+    # Marriage should not occur during marriage to another spouse
+    query = """
+    SELECT 
+        i.iid, i.name, m.mid, m.marrydate, m.divorced, m.divorcedate, m.hid, m.wid
+    FROM 
+        individuals i join marriages m INNER JOIN
+        (SELECT
+            i.iid, i.name, m.mid, m.marrydate, m.divorced, m.divorcedate, m.hid, m.wid
+        FROM
+            individuals i join marriages m
+        WHERE 
+            i.iid = m.hid OR i.iid = m.wid 
+        GROUP BY
+            i.iid
+        HAVING
+            count(i.iid)>1) mm ON mm.iid = i.iid AND (m.hid = i.iid or m.wid = i.iid)
+    """
+    result = {}
+    for i in db.query(query):
+        indis = result.keys()
+        person = dict(zip(['iid','name','mid','marrydate','divorced','divorcedate','hid','wid'],i))
+        #print(person)
+        if person['iid'] in indis:
+            result[person['iid']]['marriages'].append(person['divorced'])
+        else:
+            data = {
+                'name':person['name'],
+                'marriages':[person['divorced']]
+            }
+            result[person['iid']] = data
+    # print(result)
+    keys = result.keys()
+    for key in keys:
+        name = result[key]['name']
+        marriages = result[key]['marriages']
+        valid = 0
+        for m in marriages:
+            if m=='False':
+                valid +=1
+            else:
+                valid -=1
+            # print(m,valid)
+        if valid > 0:
+            print(f"Anomaly US11: {name}({key}) has marriage during marriage to another spouse.")
+
 def parentsNotTooOld(db):
     #US12
     # Mother should be less than 60 years older than her children and father should be less than 80 years older than his children
@@ -197,6 +244,42 @@ def multipleBirthsCap(db):
     #US14
     #No more than five siblings should be born at the same time
     pass
+
+def fewerThanFifteenSiblings(db):
+    # US15
+    # There should be fewer than 15 siblings in a family.
+    query = """
+        SELECT i.iid, i.name,j.iid,j.name
+        FROM individuals i JOIN marriages m JOIN individuals j
+        WHERE i.parentmarriage = m.mid AND i.iid<>j.iid AND j.iid IN
+        (
+            SELECT k.iid
+            FROM individuals k INNER JOIN marriages l on k.parentmarriage = l.mid
+            WHERE m.hid = l.hid OR m.wid = l.wid
+        )
+    """
+    result = {}
+    for i in db.query(query):
+        indis = result.keys()
+        person = dict(zip(['iid','name','sid','sname'],i))
+        #print(person)
+        if person['iid'] in indis:
+            result[person['iid']]['siblings'] += 1
+        else:
+            data = {
+                'name':person['name'],
+                'siblings': 1
+            }
+            result[person['iid']] = data
+    # print(result)
+    keys = result.keys()
+    for key in keys:
+        name = result[key]['name']
+        siblings = result[key]['siblings']
+        if siblings >= 15:
+            print(f"Anomaly US15: {name} ({key}) has 15 or more siblings.")
+
+
 
 def maleLastNames(db):
     #US16
@@ -238,6 +321,8 @@ def display(db):
     # Run user stories...
     # Sprint 2
     # parentsNotTooOld(db)
+    # noBigAmy(db)
+    fewerThanFifteenSiblings(db)
     # maleLastNames(db)
 
 if __name__ == "__main__":

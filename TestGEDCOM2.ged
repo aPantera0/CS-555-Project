@@ -125,4 +125,96 @@
 1 DIV
 2 DATE 8 OCT 2032
 1 _CURRENT N
+0 NOTE information about Emily Smith
+0 @L01@ INDI
+1 NAME Emily /Smith/
+1 BIRT
+2 DATE 06 JUN 1935
+1 SEX F
+1 FAMS @M01@
+0 NOTE information about France Smith
+0 @L02@ INDI
+1 NAME France /Smith/
+1 BIRT
+2 DATE 23 AUG 1933
+1 SEX M
+1 FAMS @M01@
+0 NOTE information about Jack Smith (2nd generation remarried)
+0 @L03@ INDI
+1 NAME Jack /Smith/
+1 BIRT
+2 DATE 14 JUL 1960
+1 SEX M
+1 FAMC @M01@
+1 FAMS @M03@
+0 NOTE information about Jane Smith (3rd generation)
+0 @L04@ INDI
+1 NAME Jane /Smith/
+1 BIRT
+2 DATE 22 JAN 1992
+1 SEX F
+1 FAMC @M03@
+0 NOTE information about Maria Smith (2nd generation died)
+0 @L05@ INDI
+1 NAME Maria /Smith/
+1 BIRT
+2 DATE 28 JUN 1964
+1 SEX F
+1 FAMS @M02@
+1 DEAT
+2 DATE 15 MAY 1994
+0 NOTE information about Stephanie Smith (2nd generation remarried)
+0 @L06@ INDI
+1 NAME Stephanie /Smith/ (3rd generation)
+1 BIRT
+2 DATE 03 FEB 1963
+1 SEX F
+1 FAMS @M03@
+0 NOTE information about Nick Smith
+0 @L07@ INDI
+1 NAME Nick /Leson/
+1 BIRT
+2 DATE 17 AUG 1995
+1 SEX M
+1 FAMC @M03@
+0 NOTE information about James Leson
+0 @L08@ INDI
+1 NAME James /Leson/
+1 BIRT
+2 DATE 30 SEP 1965
+1 SEX M
+1 FAMS @M04@
+0 NOTE family information
+0 @M01@ FAM
+1 MARR
+2 DATE 14 APR 1958
+1 HUSB @L02@
+1 WIFE @L01@
+1 CHIL @L03@
+0 NOTE end of @M01@
+0 @M02@ FAM
+1 MARR
+2 DATE 18 JUN 1989
+2 TYPE Death of Spouse
+1 HUSB @L03@
+1 WIFE @L05@
+1 CHIL @L04@
+0 NOTE end of @M02@
+0 @M03@ FAM
+1 MARR
+2 DATE 25 MAR 1997
+1 HUSB @L03@
+1 WIFE @L06@
+1 CHIL @L04@
+1 CHIL @L07@
+0 NOTE end of @M03@
+0 @M04@ FAM
+1 MARR
+2 DATE 13 OCT 1990
+1 HUSB @L08@
+1 WIFE @L06@
+1 CHIL @L07@
+1 DIV
+2 DATE 12 FEB 1996
+0 NOTE end of @M04@
 0 TRLR

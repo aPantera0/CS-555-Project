@@ -248,48 +248,48 @@ def multipleBirthsCap(db):
 def fewerThanFifteenSiblings(db):
     # US15
     # There should be fewer than 15 siblings in a family.
-    query = """
-        SELECT i.iid, i.name,j.iid,j.name
-        FROM individuals i JOIN marriages m JOIN individuals j
-        WHERE i.parentmarriage = m.mid AND i.iid<>j.iid AND j.iid IN
-        (
-            SELECT k.iid
-            FROM individuals k INNER JOIN marriages l on k.parentmarriage = l.mid
-            WHERE m.hid = l.hid OR m.wid = l.wid
-        )
-    """
-    result = {}
-    for i in db.query(query):
-        indis = result.keys()
-        person = dict(zip(['iid','name','sid','sname'],i))
-        #print(person)
-        if person['iid'] in indis:
-            result[person['iid']]['siblings'] += 1
-        else:
-            data = {
-                'name':person['name'],
-                'siblings': 1
-            }
-            result[person['iid']] = data
-    # print(result)
-    keys = result.keys()
-    for key in keys:
-        name = result[key]['name']
-        siblings = result[key]['siblings']
-        if siblings >= 15:
-            print(f"Anomaly US15: {name} ({key}) has 15 or more siblings.")
-
     # query = """
-    #     SELECT f.mid
-    #     FROM individuals i, marriages f
-    #     WHERE i.parentmarriage = f.mid
-    #     GROUP BY f.mid
-    #     HAVING COUNT(*)>=15
+    #     SELECT i.iid, i.name,j.iid,j.name
+    #     FROM individuals i JOIN marriages m JOIN individuals j
+    #     WHERE i.parentmarriage = m.mid AND i.iid<>j.iid AND j.iid IN
+    #     (
+    #         SELECT k.iid
+    #         FROM individuals k INNER JOIN marriages l on k.parentmarriage = l.mid
+    #         WHERE m.hid = l.hid OR m.wid = l.wid
+    #     )
     # """
+    # result = {}
     # for i in db.query(query):
-    #     fam = dict(zip(['mid'],i))
-    #     if fam['mid']:
-    #         print(f"Anomaly US15: Family {fam['mid']} has 15 or more siblings")
+    #     indis = result.keys()
+    #     person = dict(zip(['iid','name','sid','sname'],i))
+    #     #print(person)
+    #     if person['iid'] in indis:
+    #         result[person['iid']]['siblings'] += 1
+    #     else:
+    #         data = {
+    #             'name':person['name'],
+    #             'siblings': 1
+    #         }
+    #         result[person['iid']] = data
+    # # print(result)
+    # keys = result.keys()
+    # for key in keys:
+    #     name = result[key]['name']
+    #     siblings = result[key]['siblings']
+    #     if siblings >= 15:
+    #         print(f"Anomaly US15: {name} ({key}) has 15 or more siblings.")
+
+    query = """
+        SELECT f.mid
+        FROM individuals i, marriages f
+        WHERE i.parentmarriage = f.mid
+        GROUP BY f.mid
+        HAVING COUNT(*)>=15
+    """
+    for i in db.query(query):
+        fam = dict(zip(['mid'],i))
+        if fam['mid']:
+            print(f"Anomaly US15: Family {fam['mid']} has 15 or more siblings")
 
 
 

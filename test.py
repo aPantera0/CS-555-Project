@@ -364,7 +364,7 @@ Anomaly US12: Mother Lisa /Wilson/ (@I2@) is more than 60 years (232) older than
 1 SEX M
 1 BIRT
 2 DATE 18 OCT 2173
-1 FAMC @F2@
+1 FAMC @F1@
 0 @I13@ INDI
 1 NAME Daniel /Lewis/
 2 GIVN Daniel
@@ -373,7 +373,7 @@ Anomaly US12: Mother Lisa /Wilson/ (@I2@) is more than 60 years (232) older than
 1 SEX M
 1 BIRT
 2 DATE 18 OCT 2173
-1 FAMC @F2@
+1 FAMC @F1@
 0 @I14@ INDI
 1 NAME Daniel /Lewis/
 2 GIVN Daniel
@@ -382,7 +382,7 @@ Anomaly US12: Mother Lisa /Wilson/ (@I2@) is more than 60 years (232) older than
 1 SEX M
 1 BIRT
 2 DATE 18 OCT 2173
-1 FAMC @F2@
+1 FAMC @F1@
 0 @I15@ INDI
 1 NAME Daniel /Lewis/
 2 GIVN Daniel
@@ -391,7 +391,7 @@ Anomaly US12: Mother Lisa /Wilson/ (@I2@) is more than 60 years (232) older than
 1 SEX M
 1 BIRT
 2 DATE 18 OCT 2173
-1 FAMC @F2@
+1 FAMC @F1@
 0 @I16@ INDI
 1 NAME Daniel /Lewis/
 2 GIVN Daniel
@@ -400,7 +400,7 @@ Anomaly US12: Mother Lisa /Wilson/ (@I2@) is more than 60 years (232) older than
 1 SEX M
 1 BIRT
 2 DATE 18 OCT 2173
-1 FAMC @F2@
+1 FAMC @F1@
 0 @I17@ INDI
 1 NAME Daniel /Lewis/
 2 GIVN Daniel
@@ -409,7 +409,7 @@ Anomaly US12: Mother Lisa /Wilson/ (@I2@) is more than 60 years (232) older than
 1 SEX M
 1 BIRT
 2 DATE 18 OCT 2173
-1 FAMC @F2@
+1 FAMC @F1@
 0 @I18@ INDI
 1 NAME Nick /Smith/
 2 GIVN Nick
@@ -440,6 +440,12 @@ Anomaly US12: Mother Lisa /Wilson/ (@I2@) is more than 60 years (232) older than
 1 CHIL @I9@
 1 CHIL @I10@
 1 CHIL @I11@
+1 CHIL @I12@
+1 CHIL @I13@
+1 CHIL @I14@
+1 CHIL @I15@
+1 CHIL @I16@
+1 CHIL @I17@
 1 MARR
 2 DATE 3 AUG 1961
 1 EVEN
@@ -448,12 +454,6 @@ Anomaly US12: Mother Lisa /Wilson/ (@I2@) is more than 60 years (232) older than
 0 @F2@ FAM
 1 HUSB @I18@
 1 WIFE @I2@
-1 CHIL @I12@
-1 CHIL @I13@
-1 CHIL @I14@
-1 CHIL @I15@
-1 CHIL @I16@
-1 CHIL @I17@
 1 CHIL @I19@
 1 MARR
 2 DATE 3 AUG 2000
@@ -463,29 +463,14 @@ Anomaly US12: Mother Lisa /Wilson/ (@I2@) is more than 60 years (232) older than
 0 TRLR"""
         Ingest.ingest_lines(self.db, ged_lines.split('\n'))
         Display.populateAge(self.db)
-        expectedPrintout = """Anomaly US15: Daniel /Lewis/ (@I10@) has 15 or more siblings.
-Anomaly US15: Daniel /Lewis/ (@I11@) has 15 or more siblings.
-Anomaly US15: Daniel /Lewis/ (@I12@) has 15 or more siblings.
-Anomaly US15: Daniel /Lewis/ (@I13@) has 15 or more siblings.
-Anomaly US15: Daniel /Lewis/ (@I14@) has 15 or more siblings.
-Anomaly US15: Daniel /Lewis/ (@I15@) has 15 or more siblings.
-Anomaly US15: Daniel /Lewis/ (@I16@) has 15 or more siblings.
-Anomaly US15: Daniel /Lewis/ (@I17@) has 15 or more siblings.
-Anomaly US15: Kewn /Lewis/ (@I19@) has 15 or more siblings.
-Anomaly US15: Daniel /Lewis/ (@I3@) has 15 or more siblings.
-Anomaly US15: Ryan /Lewis/ (@I4@) has 15 or more siblings.
-Anomaly US15: Daniel /Lewis/ (@I5@) has 15 or more siblings.
-Anomaly US15: Daniel /Lewis/ (@I6@) has 15 or more siblings.
-Anomaly US15: Daniel /Lewis/ (@I7@) has 15 or more siblings.
-Anomaly US15: Daniel /Lewis/ (@I8@) has 15 or more siblings.
-Anomaly US15: Daniel /Lewis/ (@I9@) has 15 or more siblings.
-"""
-        # capturedOutput = io.StringIO()       # Create StringIO object
-        # sys.stdout = capturedOutput         
+        expectedPrintout = "Anomaly US15: Family @F1@ has 15 or more siblings\n"
+        capturedOutput = io.StringIO()       # Create StringIO object
+        sys.stdout = capturedOutput         
         Display.fewerThanFifteenSiblings(self.db)          #  and redirect stdout.
-        # sys.stdout = sys.__stdout__                   # Reset redirect.
+        sys.stdout = sys.__stdout__                   # Reset redirect.
         # self.maxDiff=None
-        self.assertEqual(expectedPrintout,self.capturedOutput.getvalue())
+        # print(capturedOutput.getvalue())
+        self.assertEqual(expectedPrintout,capturedOutput.getvalue())
 
     def test_US16(self):
         self.db.build(rebuild=True) 

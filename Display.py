@@ -170,6 +170,7 @@ def birthBeforeMarriageOfParents(db):
         if person['birthday'] and person['marrydate'] and person['birthday'] < person['marrydate']:
             print(f"Anomaly US08: Birth date of {person['name']} ({person['iid']}) occurs before the marriage date of their parents in Family {person['mid']}.")
 
+
 def birthBeforeParentDeath(db):
     #US09
     # Child should be born before death of mother
@@ -295,27 +296,27 @@ def siblingSpacing(db):
     # or <2 days apart (twins may be born 1 day apart
     # e.g. 11:59 PM and 12:02 AM the following calendar day
     query = """
-        SELECT mid, iid, birthday
-        FROM marriages, individuals
-        WHERE mid = parentmarriage
-        GROUP BY mid
+    SELECT
+        m.mid, i.iid, i.birthday, i.parentmarriage, i.name
+    FROM individuals i LEFT JOIN
+        marriages m ON i.parentmarriage=m.mid
     """
     siblings = dict()
     marriages = []
     for i in db.query(query):
         #get all siblings into one unit of data, dict{mid:[(iid1,birthday1),(iid2,birthday2),...]}?
-        person = dict(zip(['mid','iid','birthday'], i))
+        person = dict(zip(['mid','iid','birthday', 'parentmarriage', 'name'], i))
         if person['mid'] not in siblings.keys():
-            siblings[person['mid']] = [person['birthday']]
+            siblings[person['mid']] = [person]
             marriages.append(person['mid'])
         else:
-            siblings[person].append(person['birthday'])
-    for j in len(marriages):
+            siblings[person['mid']].append(person)
+    for j in range(len(marriages)):
         curSiblings = siblings[marriages[j]]
         for k in curSiblings:
             for l in curSiblings:
-                if (k[1] - l[1] != 0 and monthsBetween(k[1], l[1]) < 8 and abs(k[1] - l[1] > 1)):
-                    print(f"Anomaly US13: Siblings {k[0]} and {l[0]} were born within 7 months of each other and are not twins.")
+                if k['iid'] != l['iid'] and abs(monthsBetween(k['birthday'], l['birthday'])) < 8 and abs(monthsBetween(k['birthday'], l['birthday'])) > 1:
+                    print(f"Anomaly US13: Siblings {k['name']} ({k['iid']}) and {l['name']} ({l['iid']}) were born within 7 months of each other and are not twins.")
 
 def multipleBirthsLessEquals5(db):
     #US14
@@ -422,23 +423,26 @@ def display(db):
 
     # Run user stories...
     # Sprint 1
-    # datesBeforeCurrent(db)
-    # birthBeforeMarriage(db)
-    # birthBeforeDeath(db)
-    # marriageBeforeDivorce(db)
-    # marriageBeforeDeath(db)
-    # divorceBeforeDeath(db)
-    # lessThan150(db)
-    # birthBeforeMarriageOfParents(db)
+    datesBeforeCurrent(db)
+    birthBeforeMarriage(db)
+    birthBeforeDeath(db)
+    marriageBeforeDivorce(db)
+    marriageBeforeDeath(db)
+    divorceBeforeDeath(db)
+    lessThan150(db)
+    birthBeforeMarriageOfParents(db)
 
     # Run user stories...
     # Sprint 2
-    # parentsNotTooOld(db)
+    birthBeforeParentDeath(db)
+    marriageAfter14(db)
     noBigamy(db)
-    # fewerThanFifteenSiblings(db)
-    # maleLastNames(db)
-    # marriageAfter14(db)
-    # multipleBirthsLessEquals5(db)
+    parentsNotTooOld(db)
+    siblingSpacing(db)
+    multipleBirthsLessEquals5(db)
+    fewerThanFifteenSiblings(db)
+    maleLastNames(db)
+
 
 if __name__ == "__main__":
     db = Database.Database(rebuild=False)

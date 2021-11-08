@@ -287,7 +287,7 @@ def multipleBirthsLessEquals5(db):
             marriages.append(person['mid'])
         else:
             siblings[person['mid']].append(person['birthday'])
-    #goest through all mids
+    #goes through all mids
     for j in marriages:
         #finds all siblings of current mid
         curSiblings = siblings[j]

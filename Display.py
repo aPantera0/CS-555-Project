@@ -21,6 +21,10 @@ def yearsBetween(startDate: datetime.datetime, endDate: datetime.datetime = date
         years += 1
     return years
 
+def monthsBetween(startDate: datetime.datetime, endDate: datetime.datetime = datetime.datetime.today().date()):
+    return abs((endDate.year - startDate.year) * 12 + (endDate.month - startDate.month))
+
+
 def populateAge(db):
     for i in db.query("SELECT * FROM individuals"):
         person = dict(zip(schema.COLUMNS['individuals'], i))
@@ -167,6 +171,29 @@ def birthBeforeMarriageOfParents(db):
         if person['birthday'] and person['marrydate'] and person['birthday'] < person['marrydate']:
             print(f"Anomaly US08: Birth date of {person['name']} ({person['iid']}) occurs before the marriage date of their parents in Family {person['mid']}.")
 
+def birthBeforeParentDeath(db):
+    #US09
+    # Child should be born before death of mother
+    # and before 9 months after death of father
+    query = """
+    SELECT
+        c.birthday as child_bday, h.death as father_death, w.death as mother_death, h.iid as hid, w.iid as wid, h.name as hname, w.name as wname, c.iid as cid, c.name as cname, m.mid
+    FROM marriages m LEFT JOIN
+        individuals c ON c.parentmarriage=m.mid
+    LEFT JOIN 
+        individuals h on m.hid=h.iid 
+    LEFT JOIN 
+        individuals w on m.wid=w.iid 
+    WHERE c.birthday IS NOT NULL
+    """
+    for i in db.query(query):
+        person = dict(zip(['child_bday', 'father_death', 'mother_death', 'hid', 'wid', 'hname', 'wname', 'cid', 'cname', 'mid'], i))
+        if person['father_death'] and person['father_death'] < person['child_bday'] and monthsBetween(person['father_death'], person['child_bday']) > 8:
+            print(f"Anomaly US09: Father {person['hname']} ({person['hid']}) died more than 8 months before his child {person['cname']} ({person['cid']}) of family {person['mid']}.")
+        if person['mother_death'] and person['child_bday'] > person['mother_death']:
+            print(f"Anomaly US09: Mother {person['wname']} ({person['wid']}) died before her child {person['cname']} ({person['cid']}) of family {person['mid']} was born")
+
+
 def marriageAfter14(db):
     #US10: Marriage after 14
     #Marriage should be at least 14 years after birth of both spouses (parents must be at least 14 years old)
@@ -266,6 +293,36 @@ def parentsNotTooOld(db):
             print(f"Anomaly US12: Father {person['hname']} ({person['hid']}) is more than 80 years ({yearsBetween(person['father_bday'], person['child_bday'])}) older than his child {person['cname']} ({person['cid']}) of family {person['mid']}.")
         if person['mother_bday'] and yearsBetween(person['mother_bday'], person['child_bday']) > 60:
             print(f"Anomaly US12: Mother {person['wname']} ({person['wid']}) is more than 60 years ({yearsBetween(person['mother_bday'], person['child_bday'])}) older than his child {person['cname']} ({person['cid']}) of family {person['mid']}.")
+
+def siblingSpacing(db):
+    #US13
+    # Birth dates of siblings should be >8 months apart
+    # or <2 days apart (twins may be born 1 day apart
+    # e.g. 11:59 PM and 12:02 AM the following calendar day
+    query = """
+        SELECT mid, iid, birthday
+        FROM marriages, individuals
+        WHERE mid = parentmarriage
+        GROUP BY mid
+    """
+    siblings = dict()
+    marriages = []
+    for i in db.query(query):
+        #get all siblings into one unit of data, dict{mid:[(iid1,birthday1),(iid2,birthday2),...]}?
+        person = dict(zip(['mid','iid','birthday'], i))
+        if person['mid'] not in siblings.keys():
+            siblings[person['mid']] = [person['birthday']]
+            marriages.append(person['mid'])
+        else:
+            siblings[person].append(person['birthday'])
+    for j in len(marriages):
+        curSiblings = siblings[marriages[j]]
+        for k in curSiblings:
+            for l in curSiblings:
+                if (k[1] - l[1] != 0 and monthsBetween(k[1], l[1]) < 8 and abs(k[1] - l[1] > 1)):
+                    print(f"Anomaly US13: Siblings {k[0]} and {l[0]} were born within 7 months of each other and are not twins.")
+
+
 
 def multipleBirthsLessEquals5(db):
     #US14

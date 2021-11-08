@@ -5,6 +5,7 @@ import Database
 import schema
 import datetime
 from prettytable import PrettyTable
+from dateutil import relativedelta
 
 def yearsBetween(startDate: datetime.datetime, endDate: datetime.datetime = datetime.datetime.today().date()):
     """Returns the integer floor number of full years years between two dates.
@@ -169,7 +170,33 @@ def birthBeforeMarriageOfParents(db):
 def marriageAfter14(db):
     #US10: Marriage after 14
     #Marriage should be at least 14 years after birth of both spouses (parents must be at least 14 years old)
-    pass
+    
+    #gets info from marriages and then goes back to individuals to get names and birthdates of husband and wife
+    query = """
+    WITH
+        base AS (SELECT mid, marrydate, hid, wid FROM marriages),
+        hbirth AS (
+            SELECT mid, marrydate, hid, name hname, birthday hbirthday, wid
+            FROM base, individuals
+            WHERE hid = iid
+        )
+        SELECT mid, marrydate, hid, hname, hbirthday, wid, name wname, birthday wbirthday
+        FROM hbirth, individuals
+        WHERE wid = iid
+    """
+    for i in db.query(query):
+        #operates on couples instead of individuals
+        couple = dict(zip(['mid','marrydate','hid', 'hname','hbirthday','wid', 'wname', 'wbirthday'], i))
+        #both are under 14
+        #relative delta from relativedelta import from dateutil library, .years sets difference in terms of years
+        if relativedelta.relativedelta(couple['marrydate'],couple['hbirthday']).years < 14 and relativedelta.relativedelta(couple['marrydate'],couple['wbirthday']).years < 14:
+            print(f"Anomaly US10: Marriage age of {couple['hname']} ({couple['hid']}) and {couple['wname']} ({couple['wid']}) occurs before {couple['hname']} ({couple['hid']}) and {couple['wname']} ({couple['wid']}) are 14.")
+        #husband is under 14
+        if relativedelta.relativedelta(couple['marrydate'],couple['hbirthday']).years < 14:
+            print(f"Anomaly US10: Marriage age of {couple['hname']} ({couple['hid']}) and {couple['wname']} ({couple['wid']}) occurs before {couple['hname']} ({couple['hid']}) is are 14.")
+        #wife is under 14
+        if relativedelta.relativedelta(couple['marrydate'],couple['wbirthday']).years < 14:
+            print(f"Anomaly US10: Marriage age of {couple['hname']} ({couple['hid']}) and {couple['wname']} ({couple['wid']}) occurs before {couple['wname']} ({couple['wid']}) is are 14.")
 
 def noBigAmy(db):
     #US11
@@ -240,10 +267,37 @@ def parentsNotTooOld(db):
         if person['mother_bday'] and yearsBetween(person['mother_bday'], person['child_bday']) > 60:
             print(f"Anomaly US12: Mother {person['wname']} ({person['wid']}) is more than 60 years ({yearsBetween(person['mother_bday'], person['child_bday'])}) older than his child {person['cname']} ({person['cid']}) of family {person['mid']}.")
 
-def multipleBirthsCap(db):
+def multipleBirthsLessEquals5(db):
     #US14
     #No more than five siblings should be born at the same time
-    pass
+    query = """
+        SELECT mid, iid, birthday
+        FROM marriages, individuals
+        WHERE mid = parentmarriage
+    """
+    #dictionary to hold all siblings
+    siblings = dict()
+    #list to hold all mids
+    marriages = []
+    #for loop populates siblings and marriages
+    for i in db.query(query):
+        person = dict(zip(['mid','iid','birthday'], i))
+        if person['mid'] not in siblings.keys():
+            siblings[person['mid']] = [person['birthday']]
+            marriages.append(person['mid'])
+        else:
+            siblings[person['mid']].append(person['birthday'])
+    #goest through all mids
+    for j in marriages:
+        #finds all siblings of current mid
+        curSiblings = siblings[j]
+        if len(curSiblings) > 5:
+            invalidBirthdays = []
+            for k in curSiblings:
+                #counts number of duplicate birthdays, number of multiple births
+                if curSiblings.count(k) > 5 and k not in invalidBirthdays:
+                    print(f"Anomaly US13: Marriage ({j}) has more than 5 multiple births.")
+                    invalidBirthdays.append(k)
 
 def fewerThanFifteenSiblings(db):
     # US15
@@ -334,8 +388,10 @@ def display(db):
     # Sprint 2
     # parentsNotTooOld(db)
     # noBigAmy(db)
-    fewerThanFifteenSiblings(db)
+    #fewerThanFifteenSiblings(db)
     # maleLastNames(db)
+    # marriageAfter14(db)
+    # multipleBirthsLessEquals5(db)
 
 if __name__ == "__main__":
     db = Database.Database(rebuild=False)

@@ -347,7 +347,7 @@ def multipleBirthsLessEquals5(db):
             for k in curSiblings:
                 #counts number of duplicate birthdays, number of multiple births
                 if curSiblings.count(k) > 5 and k not in invalidBirthdays:
-                    print(f"Anomaly US13: Marriage ({j}) has more than 5 multiple births.")
+                    print(f"Anomaly US14: Marriage ({j}) has more than 5 multiple births.")
                     invalidBirthdays.append(k)
 
 def fewerThanFifteenSiblings(db):

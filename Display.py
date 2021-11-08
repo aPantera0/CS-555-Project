@@ -5,7 +5,6 @@ import Database
 import schema
 import datetime
 from prettytable import PrettyTable
-from dateutil import relativedelta
 
 def yearsBetween(startDate: datetime.datetime, endDate: datetime.datetime = datetime.datetime.today().date()):
     """Returns the integer floor number of full years years between two dates.
@@ -193,7 +192,6 @@ def birthBeforeParentDeath(db):
         if person['mother_death'] and person['child_bday'] > person['mother_death']:
             print(f"Anomaly US09: Mother {person['wname']} ({person['wid']}) died before her child {person['cname']} ({person['cid']}) of family {person['mid']} was born")
 
-
 def marriageAfter14(db):
     #US10: Marriage after 14
     #Marriage should be at least 14 years after birth of both spouses (parents must be at least 14 years old)
@@ -216,61 +214,58 @@ def marriageAfter14(db):
         couple = dict(zip(['mid','marrydate','hid', 'hname','hbirthday','wid', 'wname', 'wbirthday'], i))
         #both are under 14
         #relative delta from relativedelta import from dateutil library, .years sets difference in terms of years
-        if relativedelta.relativedelta(couple['marrydate'],couple['hbirthday']).years < 14 and relativedelta.relativedelta(couple['marrydate'],couple['wbirthday']).years < 14:
+        if yearsBetween(couple['hbirthday'], couple['marrydate']) < 14 and yearsBetween(couple['wbirthday'], couple['marrydate']) < 14:
             print(f"Anomaly US10: Marriage age of {couple['hname']} ({couple['hid']}) and {couple['wname']} ({couple['wid']}) occurs before {couple['hname']} ({couple['hid']}) and {couple['wname']} ({couple['wid']}) are 14.")
         #husband is under 14
-        if relativedelta.relativedelta(couple['marrydate'],couple['hbirthday']).years < 14:
-            print(f"Anomaly US10: Marriage age of {couple['hname']} ({couple['hid']}) and {couple['wname']} ({couple['wid']}) occurs before {couple['hname']} ({couple['hid']}) is are 14.")
+        if yearsBetween(couple['hbirthday'], couple['marrydate']) < 14:
+            print(f"Anomaly US10: Marriage age of {couple['hname']} ({couple['hid']}) and {couple['wname']} ({couple['wid']}) occurs before {couple['hname']} ({couple['hid']}) is 14.")
         #wife is under 14
-        if relativedelta.relativedelta(couple['marrydate'],couple['wbirthday']).years < 14:
-            print(f"Anomaly US10: Marriage age of {couple['hname']} ({couple['hid']}) and {couple['wname']} ({couple['wid']}) occurs before {couple['wname']} ({couple['wid']}) is are 14.")
+        # if relativedelta.relativedelta(couple['marrydate'],couple['wbirthday']).years < 14:
+        if yearsBetween(couple['wbirthday'], couple['marrydate']) < 14:
+            print(f"Anomaly US10: Marriage age of {couple['hname']} ({couple['hid']}) and {couple['wname']} ({couple['wid']}) occurs before {couple['wname']} ({couple['wid']}) is 14.")
 
-def noBigAmy(db):
+def noBigamy(db):
     #US11
     # Marriage should not occur during marriage to another spouse
     query = """
-    SELECT 
-        i.iid, i.name, m.mid, m.marrydate, m.divorced, m.divorcedate, m.hid, m.wid
-    FROM 
-        individuals i join marriages m INNER JOIN
-        (SELECT
-            i.iid, i.name, m.mid, m.marrydate, m.divorced, m.divorcedate, m.hid, m.wid
-        FROM
-            individuals i join marriages m
-        WHERE 
-            i.iid = m.hid OR i.iid = m.wid 
-        GROUP BY
-            i.iid
-        HAVING
-            count(i.iid)>1) mm ON mm.iid = i.iid AND (m.hid = i.iid or m.wid = i.iid)
+    SELECT
+        i.iid, i.name, i.birthday, i.death, m.marrydate, m.divorcedate
+    FROM individuals i LEFT JOIN
+        marriages m ON i.iid=m.hid OR i.iid=m.wid
     """
-    result = {}
+    spouces = {}
+    people = {}
     for i in db.query(query):
-        indis = result.keys()
-        person = dict(zip(['iid','name','mid','marrydate','divorced','divorcedate','hid','wid'],i))
-        #print(person)
-        if person['iid'] in indis:
-            result[person['iid']]['marriages'].append(person['divorced'])
+        person = dict(zip(['iid', 'name', 'birthday', 'death', 'marrydate', 'divorcedate'], i))
+        people[person['iid']] = person
+        # populate the people database with keys of the persons ids, and values of tuples of each marry date and divorce date
+        if person['iid'] in spouces:
+            spouces[person['iid']].append((person['marrydate'], person['divorcedate'], person))
         else:
-            data = {
-                'name':person['name'],
-                'marriages':[person['divorced']]
-            }
-            result[person['iid']] = data
-    # print(result)
-    keys = result.keys()
-    for key in keys:
-        name = result[key]['name']
-        marriages = result[key]['marriages']
-        valid = 0
-        for m in marriages:
-            if m=='False':
-                valid +=1
-            else:
-                valid -=1
-            # print(m,valid)
-        if valid > 0:
-            print(f"Anomaly US11: {name}({key}) has marriage during marriage to another spouse.")
+            spouces[person['iid']] = [(person['marrydate'], person['divorcedate'], person)]
+        
+    reportedIIDs = set()
+    for p in spouces:
+        marriages = spouces[p]
+        if len(marriages) < 2:
+            continue # they can't commit biagamy if they were married less than twice
+
+        for mi, m in enumerate(marriages):
+            valid = True
+            for m2i, m2 in enumerate(marriages):
+                if mi != m2i:
+                    if m[0] < m2[0]: # If this marriage starts before the next one
+                        if not (m[1] and m[1] < m2[0]): # It must also end before the next one (this one must also have ended)
+                            valid = False
+                            break
+                    else: # If this marriage stars after the next one starts
+                        if not (m2[1] and m[0] > m2[1]): # it must also start after the next one ends (the next one must also have ended)
+                            valid = False
+                            break
+
+            if not valid and m[2]['iid'] not in reportedIIDs:
+                print(f"Anomaly US11: {m[2]['name']}({m[2]['iid']}) has marriage during marriage to another spouse.")
+                reportedIIDs.add(m[2]['iid']) # we don't want to report the same anomoly twice
 
 def parentsNotTooOld(db):
     #US12
@@ -321,8 +316,6 @@ def siblingSpacing(db):
             for l in curSiblings:
                 if (k[1] - l[1] != 0 and monthsBetween(k[1], l[1]) < 8 and abs(k[1] - l[1] > 1)):
                     print(f"Anomaly US13: Siblings {k[0]} and {l[0]} were born within 7 months of each other and are not twins.")
-
-
 
 def multipleBirthsLessEquals5(db):
     #US14
@@ -402,8 +395,6 @@ def fewerThanFifteenSiblings(db):
         if fam['mid']:
             print(f"Anomaly US15: Family {fam['mid']} has 15 or more siblings")
 
-
-
 def maleLastNames(db):
     #US16
     # All male members of a family should have the same last name
@@ -424,7 +415,6 @@ def maleLastNames(db):
         if son_last != father_last:
             print(f"Anomaly US16: Son {person['son_name']} ({person['son_id']}) doesn't have the same last name as his father {person['father_name']} ({person['father_id']}) of family {person['mid']}.")
 
-
 def display(db):
     # Display SQL tables...
     populateAge(db)
@@ -444,8 +434,8 @@ def display(db):
     # Run user stories...
     # Sprint 2
     # parentsNotTooOld(db)
-    # noBigAmy(db)
-    #fewerThanFifteenSiblings(db)
+    noBigamy(db)
+    # fewerThanFifteenSiblings(db)
     # maleLastNames(db)
     # marriageAfter14(db)
     # multipleBirthsLessEquals5(db)

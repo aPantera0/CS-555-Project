@@ -416,6 +416,17 @@ def maleLastNames(db):
         if son_last != father_last:
             print(f"Anomaly US16: Son {person['son_name']} ({person['son_id']}) doesn't have the same last name as his father {person['father_name']} ({person['father_id']}) of family {person['mid']}.")
 
+def noSiblingsMarriage(db):
+    #US 18
+    #No siblings should be married to each other
+    pass
+
+def uniqueFamilySpouses(db):
+    #US 24
+    #No more than one family with the same spouses
+    #by name and the same marriage date should appear in the GEDCOM file
+    pass
+
 def display(db):
     # Display SQL tables...
     populateAge(db)

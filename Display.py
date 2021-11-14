@@ -420,6 +420,8 @@ def noSiblingMarriage(db):
     #US 18
     #No siblings should be married to each other
 
+    #returns all marriages where husband and wife have same father or mother
+    #of form (mid, hid husband, hid.name hname, wid wife, wid.name wname)
     query = """
         WITH husbands as (
             SELECT m.mid, m.hid husband, i.name hname, p.hid hpa, p.wid hma, m.wid wife
@@ -434,6 +436,7 @@ def noSiblingMarriage(db):
         FROM wifes m
         WHERE hpa = wpa OR hma = wma
     """
+    #outputs all marriages between siblings
     for i in db.query(query):
         marriage = dict(zip(['mid', 'husband', 'hname', 'wife', 'wname']))
         print(f"Anomaly US18: Marriage ({marriage['mid']}) occurs between siblings {marriage['hname']} ({marriage['husband']}) and {marriage['wname']} ({marriage['wife']}).")
@@ -441,7 +444,30 @@ def noSiblingMarriage(db):
 def uniqueIDs(db):
     #US 22
     #All individual IDs should be unique and all family IDs should be unique
-    pass
+    
+    #gets all duplicate individual IDs
+    query1 = """
+        SELECT iid, count(iid) number
+        FROM individuals
+        GROUP BY iid
+        HAVING count(iid) > 1
+    """
+    #outputs all non-unique individual IDs
+    for i in db.query(query1):
+        individualID = dict(zip(['iid', 'number']))
+        print(f"Anomaly US 22: Individual ID ({individualID['iid']}) is not unique, with a number of {individualID['number']} occurrences within the GEDCOM file.")
+
+    #gets all duplicate family IDs
+    query2 = """
+        SELECT mid, count(mid) number
+        FROM marriages
+        GROUP BY mid
+        HAVING count(mid) > 1    
+    """
+    #outputs all non-unique family IDs
+    for i in db.query(query2):
+        familyID = dict(zip(['mid', 'number']))
+        print(f"Anomaly US 22: Family ID ({familyID['mid']}) is not unique, with a number of {familyID['number']} occurrences within the GEDCOM file.")
 
 def uniqueFamilySpouses(db):
     #US 24
@@ -483,7 +509,7 @@ def display(db):
     #US 19 First cousins should not marry
     #US 20 Aunts and Uncles
     #US 21 Correct gender for role
-    #US 22 Unique IDs
+    uniqueIDs(db)
     #US 23 Unique name and birth date
     #US 24 Unique families by spouses
 

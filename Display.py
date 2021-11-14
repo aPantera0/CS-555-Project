@@ -416,7 +416,7 @@ def maleLastNames(db):
         if son_last != father_last:
             print(f"Anomaly US16: Son {person['son_name']} ({person['son_id']}) doesn't have the same last name as his father {person['father_name']} ({person['father_id']}) of family {person['mid']}.")
 
-def noSiblingsMarriage(db):
+def noSiblingMarriage(db):
     #US 18
     #No siblings should be married to each other
 
@@ -428,7 +428,7 @@ def noSiblingsMarriage(db):
         ), wifes as (
             SELECT  h.mid, husband, hname, hpa, hma, wife, i.name wname, p.hid wpa, p.wid wma
             FROM husbands h, individuals i, marriages p
-            WHERE h.wife = iid AND i.parrentmarriage = p.mid
+            WHERE h.wife = iid AND i.parentmarriage = p.mid
         )
         SELECT mid, husband, hname, wife, wname
         FROM wifes m
@@ -437,6 +437,11 @@ def noSiblingsMarriage(db):
     for i in db.query(query):
         marriage = dict(zip(['mid', 'husband', 'hname', 'wife', 'wname']))
         print(f"Anomaly US18: Marriage ({marriage['mid']}) occurs between siblings {marriage['hname']} ({marriage['husband']}) and {marriage['wname']} ({marriage['wife']}).")
+
+def uniqueIDs(db):
+    #US 22
+    #All individual IDs should be unique and all family IDs should be unique
+    pass
 
 def uniqueFamilySpouses(db):
     #US 24
@@ -471,6 +476,16 @@ def display(db):
     fewerThanFifteenSiblings(db)
     maleLastNames(db)
 
+    #Run user stories...
+    #Sprint 3
+    #US 17 No marriages to descendants
+    noSiblingMarriage(db)
+    #US 19 First cousins should not marry
+    #US 20 Aunts and Uncles
+    #US 21 Correct gender for role
+    #US 22 Unique IDs
+    #US 23 Unique name and birth date
+    #US 24 Unique families by spouses
 
 if __name__ == "__main__":
     db = Database.Database(rebuild=False)

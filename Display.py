@@ -419,7 +419,24 @@ def maleLastNames(db):
 def noSiblingsMarriage(db):
     #US 18
     #No siblings should be married to each other
-    pass
+
+    query = """
+        WITH husbands as (
+            SELECT m.mid, m.hid husband, i.name hname, p.hid hpa, p.wid hma, m.wid wife
+            FROM marriages m, individuals i, marriages p
+            WHERE m.hid = iid AND i.parentmarriage = p.mid
+        ), wifes as (
+            SELECT  h.mid, husband, hname, hpa, hma, wife, i.name wname, p.hid wpa, p.wid wma
+            FROM husbands h, individuals i, marriages p
+            WHERE h.wife = iid AND i.parrentmarriage = p.mid
+        )
+        SELECT mid, husband, hname, wife, wname
+        FROM wifes m
+        WHERE hpa = wpa OR hma = wma
+    """
+    for i in db.query(query):
+        marriage = dict(zip(['mid', 'husband', 'hname', 'wife', 'wname']))
+        print(f"Anomaly US18: Marriage ({marriage['mid']}) occurs between siblings {marriage['hname']} ({marriage['husband']}) and {marriage['wname']} ({marriage['wife']}).")
 
 def uniqueFamilySpouses(db):
     #US 24

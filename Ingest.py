@@ -28,7 +28,12 @@ def ingest_lines(db, lines: List[str]):
             if values and table: # if the values dictionary is not empty, we have some info about a previous person or family in it
                 sql = f"INSERT INTO {table} ({', '.join([k for k in values])}) VALUES ({', '.join(['%s' for k in values])})"
                 val = [v for k, v in values.items()]
-                db.cursor.execute(sql, val)
+                try:
+                    db.cursor.execute(sql, val)
+                except:
+                    #US 22
+                    print(f"Anomaly US 22: Individual ID ({values['iid']}) is not unique.") if table == 'individuals' else  print(f"Anomaly US 22: Family ID ({values['mid']}) is not unique.")
+            
             values = {}
             if tag == 'INDI':
                 table = 'individuals'

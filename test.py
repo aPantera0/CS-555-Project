@@ -1071,8 +1071,143 @@ class Tester(unittest.TestCase):
 
         Ingest.ingest_lines(self.db, ged_lines.split('\n'))
         Display.populateAge(self.db)
-        Display.maleLastNames(self.db)
         expectedPrintout = "Anomaly US16: Son Daniel /Lewis/ (@I3@) doesn't have the same last name as his father Mark /Glasgow/ (@I1@) of family @F1@.\n"
+        self.assertEqual(expectedPrintout, self.capturedOutput.getvalue())
+
+    def test_US18(self):
+        self.db.build(rebuild=True)
+        ged_lines = """0 @I1@ INDI
+            1 NAME Mark /Glasgow/
+            2 GIVN Mark
+            2 SURN Glasgow
+            2 _MARNM Glasgow
+            1 SEX M
+            1 BIRT
+            2 DATE 3 MAY 1942
+            1 DEAT Y
+            2 DATE 5 DEC 2010
+            1 FAMS @F1@
+            0 @I2@ INDI
+            1 NAME Lisa /Wilson/
+            2 GIVN Lisa
+            2 SURN Wilson
+            2 _MARNM Glasgow
+            1 SEX F
+            1 BIRT
+            2 DATE 8 APR 1942
+            1 DEAT Y
+            2 DATE 12 JAN 2021
+            1 FAMS @F1@
+            1 FAMS @F2@
+            0 @I3@ INDI
+            1 NAME Daniel /Glasgow/
+            2 GIVN Daniel
+            2 SURN Glasgow
+            2 _MARNM Glasgow
+            1 SEX M
+            1 BIRT
+            2 DATE 18 OCT 1972
+            1 FAMC @F1@
+            0 @I4@ INDI
+            1 NAME Ryan /Lewis/
+            2 GIVN Daniel
+            2 SURN Glasgow
+            2 _MARNM Glasgow
+            1 SEX F
+            1 BIRT
+            2 DATE 18 OCT 1973
+            1 FAMC @F1@
+            0 @I5@ INDI
+            1 NAME Daniel /Glasgow/
+            2 GIVN Daniel
+            2 SURN Glasgow
+            2 _MARNM Glasgow
+            1 SEX M
+            1 BIRT
+            2 DATE 18 OCT 1972
+            1 FAMC @F1@
+            0 @F1@ FAM
+            1 HUSB @I1@
+            1 WIFE @I2@
+            1 CHIL @I3@
+            1 CHIL @I4@
+            1 CHIL @I5@
+            1 MARR
+            2 DATE 3 AUG 1961
+            1 EVEN
+            2 TYPE Ending
+            1 _CURRENT N
+            0 @F2@ FAM
+            1 HUSB @I5@
+            1 WIFE @I4@
+            1 MARR
+            2 DATE 3 AUG 2000
+            1 EVEN
+            2 TYPE Ending
+            1 _CURRENT N
+            0 TRLR"""
+        Ingest.ingest_lines(self.db, ged_lines.split('\n'))
+        Display.populateAge(self.db)
+        expectedPrintout = "Anomaly US18: Marriage (@F2@) occurs between siblings Daniel /Glasgow/ (@I5@) and Ryan /Lewis/ (@I4@).\n"
+        Display.noSiblingMarriage(self.db)
+        self.assertEqual(expectedPrintout, self.capturedOutput.getvalue())
+
+    def test_US22(self):
+        self.db.build(rebuild=True)
+        ged_lines = """0 @I1@ INDI
+            1 NAME Mark /Glasgow/
+            2 GIVN Mark
+            2 SURN Glasgow
+            2 _MARNM Glasgow
+            1 SEX M
+            1 BIRT
+            2 DATE 3 MAY 1942
+            1 DEAT Y
+            2 DATE 5 DEC 2010
+            1 FAMS @F1@
+            0 @I2@ INDI
+            1 NAME Lisa /Wilson/
+            2 GIVN Lisa
+            2 SURN Wilson
+            2 _MARNM Glasgow
+            1 SEX F
+            1 BIRT
+            2 DATE 8 APR 1942
+            1 DEAT Y
+            2 DATE 12 JAN 2020
+            1 FAMS @F1@
+            1 FAMS @F2@
+            0 @I1@ INDI
+            1 NAME Mark /Glasgow/
+            2 GIVN Mark
+            2 SURN Glasgow
+            2 _MARNM Glasgow
+            1 SEX M
+            1 BIRT
+            2 DATE 3 MAY 1942
+            1 DEAT Y
+            2 DATE 5 DEC 2010
+            1 FAMS @F1@
+            0 @F1@ FAM
+            1 HUSB @I1@
+            1 WIFE @I2@
+            1 MARR
+            2 DATE 3 AUG 1961
+            1 EVEN
+            2 TYPE Ending
+            1 _CURRENT N
+            0 @F1@ FAM
+            1 HUSB @I1@
+            1 WIFE @I2@
+            1 MARR
+            2 DATE 3 AUG 1961
+            1 EVEN
+            2 TYPE Ending
+            1 _CURRENT N
+            0 TRLR"""
+        Ingest.ingest_lines(self.db, ged_lines.split('\n'))
+        Display.populateAge(self.db)
+        expectedPrintout = "Anomaly US 22: Individual ID (@I1@) is not unique.\nAnomaly US 22: Family ID (@F1@) is not unique.\n"
         self.assertEqual(expectedPrintout, self.capturedOutput.getvalue())
 
     def tearDown(self) -> None:
@@ -1081,3 +1216,4 @@ class Tester(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+    sys.stdout = sys.__stdout__

@@ -416,6 +416,32 @@ def maleLastNames(db):
         if son_last != father_last:
             print(f"Anomaly US16: Son {person['son_name']} ({person['son_id']}) doesn't have the same last name as his father {person['father_name']} ({person['father_id']}) of family {person['mid']}.")
 
+def noDescendentMarriage(db):
+    #US 17
+    #Parents should not marry any of their descendents
+    query1 = """
+        SELECT h.name, h.iid, w.name, w.iid, m.mid
+        FROM marriages m LEFT JOIN individuals h on m.hid=h.iid
+            LEFT JOIN individuals w on m.wid=w.iid
+        WHERE h.name IS NOT NULL AND w.name IS NOT NULL
+    """
+    query2 = """
+        SELECT c.name, c.iid, c.parentmarriage, h.name, h.iid, w.name
+        FROM individuals c LEFT JOIN marriages m on c.parentmarriage=m.mid
+            LEFT JOIN individuals h on h.iid=m.hid
+            LEFT JOIN individuals w on w.iid=m.wid
+        WHERE c.name IS NOT NULL AND h.name IS NOT NULL AND w.name IS NOT NULL
+    """
+    for i in db.query(query1):
+        marriage = dict(zip(['hname', 'hid', 'wname', 'wid' 'mid'], i))
+        for j in db.query(query2):
+            child = dict(zip(['cname', 'cid', 'cpm', 'fname', 'fid', 'mname'], i))
+            print(f"hname:{marriage['hname']} hid:{marriage['hid']} wname:{marriage['wname']}  ")
+            print(f"cname:{child['cname']} cid:{child['cid']} cpm:{child['cpm']} fname:{child['fname']} fid:{child['fid']}")
+            if ((child['cid'] == marriage['hid'] or child['cid'] == marriage['wid']) and (child['fid'] == marriage['hid'])):
+                print(f"Anomaly US17: Marriage ({marriage['mid']}) occurs between a parent and their descendent {child['cname']} ({child['cid']}).")
+
+
 def noSiblingMarriage(db):
     #US 18
     #No siblings should be married to each other
@@ -440,6 +466,24 @@ def noSiblingMarriage(db):
     for i in db.query(query):
         marriage = dict(zip(['mid', 'husband', 'hname', 'wife', 'wname'], i))
         print(f"Anomaly US18: Marriage ({marriage['mid']}) occurs between siblings {marriage['hname']} ({marriage['husband']}) and {marriage['wname']} ({marriage['wife']}).")
+
+def genderRole(db):
+    #US 21
+    #Correct gender for role
+    #ex. husband in family should be male, wife should be female
+    query = """
+        SELECT h.name, h.iid, h.gender, w.name, w.iid, w.gender, m.mid
+        FROM marriages m LEFT JOIN individuals h on m.hid=h.iid
+            LEFT JOIN individuals w on m.wid=w.iid
+        WHERE h.name IS NOT NULL AND w.name IS NOT NULL
+    """
+    for i in db.query(query):
+        marriage = dict(zip(['hname', 'hid', 'hgender', 'wname', 'wid', 'wgender', 'mid'], i))
+        if (marriage['hgender'] == 'F'):
+            print(f"Anomaly US21: Husband {marriage['hname']} ({marriage['hid']}) has gender F.")
+        if (marriage['wgender'] == 'M'):
+            print(f"Anomaly US21: Wife {marriage['wname']} ({marriage['wid']}) has gender M.")
+
 
 #def uniqueIDs(db):
 #    #US 22 is NOW IN INGEST.PY
@@ -505,10 +549,13 @@ def display(db):
     #Run user stories...
     #Sprint 3
     #US 17 No marriages to descendants
+    noDescendentMarriage(db)
+    #US 18 No marriages to siblings
     noSiblingMarriage(db)
     #US 19 First cousins should not marry
     #US 20 Aunts and Uncles
     #US 21 Correct gender for role
+    genderRole(db)
     #US 23 Unique name and birth date
     #US 24 Unique families by spouses
 

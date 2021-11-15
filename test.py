@@ -1074,6 +1074,66 @@ class Tester(unittest.TestCase):
         expectedPrintout = "Anomaly US16: Son Daniel /Lewis/ (@I3@) doesn't have the same last name as his father Mark /Glasgow/ (@I1@) of family @F1@.\n"
         self.assertEqual(expectedPrintout, self.capturedOutput.getvalue())
 
+    def test_US17(self):
+        self.db.build(rebuild=True)
+        ged_lines = """
+            0 @I1@ INDI
+            1 NAME Mark /Glasgow/
+            2 GIVN Mark
+            2 SURN Glasgow
+            2 _MARNM Glasgow
+            1 SEX M
+            1 BIRT
+            2 DATE 3 MAY 1942
+            1 DEAT Y
+            2 DATE 5 DEC 2010
+            1 FAMS @F1@
+            0 @I2@ INDI
+            1 NAME Lisa /Wilson/
+            2 GIVN Lisa
+            2 SURN Wilson
+            2 _MARNM Glasgow
+            1 SEX F
+            1 BIRT
+            2 DATE 8 APR 1942
+            1 DEAT Y
+            2 DATE 12 JAN 2020
+            1 FAMS @F1@
+            0 @I3@ INDI
+            1 NAME Daniel /Glasgow/
+            2 GIVN Daniel
+            2 SURN Glasgow
+            2 _MARNM Glasgow
+            1 SEX M
+            1 BIRT
+            2 DATE 18 OCT 1972
+            1 FAMC @F1@
+            1 FAMC @F2@
+            0 @F1@ FAM
+            1 HUSB @I1@
+            1 WIFE @I2@
+            1 CHIL @I3@
+            1 MARR
+            2 DATE 3 AUG 1961
+            1 EVEN
+            2 TYPE Ending
+            1 _CURRENT N
+            0 @F2@ FAM
+            1 HUSB @I1@
+            1 WIFE @I3@
+            1 MARR
+            2 DATE 3 AUG 1981
+            1 EVEN
+            2 TYPE Ending
+            1 _CURRENT N
+            0 TRLR
+        """
+        Ingest.ingest_lines(self.db, ged_lines.split('\n'))
+        Display.populateAge(self.db)
+        expectedPrintout = "Anomaly US17: Marriage (@F1@) occurs between a parent and their descendent Daniel /Glasgow/ (@I3@)."
+        #Display.noSiblingMarriage(self.db)
+        self.assertEqual(expectedPrintout, self.capturedOutput.getvalue())
+
     def test_US18(self):
         self.db.build(rebuild=True)
         ged_lines = """0 @I1@ INDI
@@ -1150,6 +1210,46 @@ class Tester(unittest.TestCase):
         Display.populateAge(self.db)
         expectedPrintout = "Anomaly US18: Marriage (@F2@) occurs between siblings Daniel /Glasgow/ (@I5@) and Ryan /Lewis/ (@I4@).\n"
         Display.noSiblingMarriage(self.db)
+        self.assertEqual(expectedPrintout, self.capturedOutput.getvalue())
+
+    def test_US21(self):
+        self_db.build(rebuild=True)
+        ged_lines = """
+            0 @I1@ INDI
+            1 NAME Mark /Glasgow/
+            2 GIVN Mark
+            2 SURN Glasgow
+            2 _MARNM Glasgow
+            1 SEX F
+            1 BIRT
+            2 DATE 3 MAY 1942
+            1 DEAT Y
+            2 DATE 5 DEC 2010
+            1 FAMS @F1@
+            0 @I2@ INDI
+            1 NAME Lisa /Wilson/
+            2 GIVN Lisa
+            2 SURN Wilson
+            2 _MARNM Glasgow
+            1 SEX M
+            1 BIRT
+            2 DATE 8 APR 1942
+            1 DEAT Y
+            2 DATE 12 JAN 2020
+            1 FAMS @F1@
+            0 @F1@ FAM
+            1 HUSB @I1@
+            1 WIFE @I2@
+            1 MARR
+            2 DATE 3 AUG 1961
+            1 EVEN
+            2 TYPE Ending
+            1 _CURRENT N
+            0 TRLR
+        """
+        Ingest.ingest_lines(self.db, ged_lines.split('\n'))
+        Display.populateAge(self.db)
+        expectedPrintout = "Anomaly US 21: Husband Mark /Glasgow/ (@I1@) has gender F."
         self.assertEqual(expectedPrintout, self.capturedOutput.getvalue())
 
     def test_US22(self):

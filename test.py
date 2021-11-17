@@ -21,6 +21,7 @@ class Tester(unittest.TestCase):
         self.db = Database.Database() # Initialize database
 
     def example_test_US01(self):
+        # This test case will not be run because it doesnt start with the word 'test'
         """For each user story we need to 
         1. build a database object with our test gedcom information, 
         2. run the user story on it, and 
@@ -63,8 +64,8 @@ class Tester(unittest.TestCase):
         Ingest.ingest_lines(self.db, ged_lines.split('\n'))
         Display.populateAge(self.db)
         Display.datesBeforeCurrent(self.db)
-        #self.assertEqual("Error US01: Lisa /Wilson/ (@I2@) 's death comes after today's date!\n", self.capturedOutput.getvalue())
-        self.assertEqual(True, True)
+        self.db.commit() # we need this because if the test fails, it will hang on the database connection, this closes it. 
+        self.assertEqual("Error US01: Lisa /Wilson/ (@I2@) 's death comes after today's date!\n", self.capturedOutput.getvalue())
 
     def test_US09(self):
         self.db.build(rebuild=True)
@@ -108,8 +109,8 @@ class Tester(unittest.TestCase):
         Ingest.ingest_lines(self.db, ged_lines.split('\n'))
         Display.populateAge(self.db)
         Display.birthBeforeParentDeath(self.db)
-        expectedPrintout = """Anomaly US09: Mother Lisa /Wilson/ (@I1@) died before her child Daniel Glasgow of family @F1@ was born
-"""
+        expectedPrintout = """Anomaly US09: Mother Lisa /Wilson/ (@I1@) died before her child Daniel /Glasgow/ (@I3@) of family @F1@ was born\n"""
+        self.db.commit()
         self.assertEqual(expectedPrintout, self.capturedOutput.getvalue())
 
     def test_US10(self):
@@ -338,6 +339,7 @@ class Tester(unittest.TestCase):
         Ingest.ingest_lines(self.db, ged_lines.split('\n'))
         Display.populateAge(self.db)
         Display.marriageAfter14(self.db)
+        self.db.commit()
         self.assertEqual("Anomaly US10: Marriage age of Daniel /Glasgow/ (@I3@) and Jennifer /Broome/ (@I7@) occurs before Daniel /Glasgow/ (@I3@) is 14.\nAnomaly US10: Marriage age of Daniel /Glasgow/ (@I3@) and Elizabeth /Redington/ (@I5@) occurs before Daniel /Glasgow/ (@I3@) is 14.\n", self.capturedOutput.getvalue())
 
     def test_US11(self):
@@ -470,6 +472,7 @@ class Tester(unittest.TestCase):
         Display.populateAge(self.db)
         Display.noBigamy(self.db)
         expectedPrintout = """Anomaly US11: Lisa /Wilson/(@I2@) has marriage during marriage to another spouse.\n"""
+        self.db.commit()
         self.assertEqual(expectedPrintout, self.capturedOutput.getvalue())
 
     def test_US12(self):
@@ -517,17 +520,16 @@ class Tester(unittest.TestCase):
             2 TYPE Ending
             1 _CURRENT N
             0 TRLR"""
-
         Ingest.ingest_lines(self.db, ged_lines.split('\n'))
         Display.populateAge(self.db)
         Display.parentsNotTooOld(self.db)
         expectedPrintout = """Anomaly US12: Father Mark /Glasgow/ (@I1@) is more than 80 years (232) older than his child Daniel /Glasgow/ (@I3@) of family @F1@.\nAnomaly US12: Mother Lisa /Wilson/ (@I2@) is more than 60 years (232) older than his child Daniel /Glasgow/ (@I3@) of family @F1@.\n"""
+        self.db.commit()
         self.assertEqual(expectedPrintout, self.capturedOutput.getvalue())
 
     def test_US13(self):
         self.db.build(rebuild=True)
-        ged_lines = """
-            0 @I1@ INDI
+        ged_lines = """0 @I1@ INDI
             1 NAME Lisa /Wilson/
             2 GIVN Lisa
             2 SURN Wilson
@@ -573,14 +575,14 @@ class Tester(unittest.TestCase):
             1 CHIL @I3@
             1 CHIL @I4@
             1 _CURRENT Y
-            0 TRLR
-        """
+            0 TRLR"""
         Ingest.ingest_lines(self.db, ged_lines.split('\n'))
         Display.populateAge(self.db)
         Display.parentsNotTooOld(self.db)
         expectedPrintout = """Anomaly US13: Siblings Daniel Glasgow (@I3@) and Thomas Glasgow (@I4@) were born 7 months of each other and are not twins."""
-        self.assertEqual(expectedPrintout, self.capturedOutput.getValue())
-
+        self.db.commit()
+        self.assertEqual(expectedPrintout, self.capturedOutput.getvalue())
+        
     def test_US14(self):
         self.db.build(rebuild=True) 
         ged_lines = """0 NOTE https://github.com/aPantera0/CS-555-Project
@@ -795,10 +797,10 @@ class Tester(unittest.TestCase):
             2 TYPE Ending
             1 _CURRENT N
             0 TRLR"""
-
         Ingest.ingest_lines(self.db, ged_lines.split('\n'))
         Display.populateAge(self.db)
         Display.multipleBirthsLessEquals5(self.db)
+        self.db.commit()
         self.assertEqual("Anomaly US14: Marriage (@F1@) has more than 5 multiple births.\n", self.capturedOutput.getvalue())
 
     def test_US15(self):
@@ -1014,14 +1016,10 @@ class Tester(unittest.TestCase):
             0 TRLR"""
         Ingest.ingest_lines(self.db, ged_lines.split('\n'))
         Display.populateAge(self.db)
-        expectedPrintout = "Anomaly US15: Family @F1@ has 15 or more siblings\n"
-        capturedOutput = io.StringIO()       # Create StringIO object
-        sys.stdout = capturedOutput         
-        Display.fewerThanFifteenSiblings(self.db)          #  and redirect stdout.
-        sys.stdout = sys.__stdout__                   # Reset redirect.
-        # self.maxDiff=None
-        # print(capturedOutput.getvalue())
-        self.assertEqual(expectedPrintout,capturedOutput.getvalue())
+        Display.fewerThanFifteenSiblings(self.db)       
+        expectedPrintout = "Anomaly US15: Family @F1@ has 15 or more siblings\n"  
+        self.db.commit()
+        self.assertEqual(expectedPrintout, self.capturedOutput.getvalue())
 
     def test_US16(self):
         self.db.build(rebuild=True) 
@@ -1076,8 +1074,7 @@ class Tester(unittest.TestCase):
 
     def test_US17(self):
         self.db.build(rebuild=True)
-        ged_lines = """
-            0 @I1@ INDI
+        ged_lines = """0 @I1@ INDI
             1 NAME Mark /Glasgow/
             2 GIVN Mark
             2 SURN Glasgow
@@ -1126,12 +1123,12 @@ class Tester(unittest.TestCase):
             1 EVEN
             2 TYPE Ending
             1 _CURRENT N
-            0 TRLR
-        """
+            0 TRLR"""
         Ingest.ingest_lines(self.db, ged_lines.split('\n'))
         Display.populateAge(self.db)
         expectedPrintout = "Anomaly US17: Marriage (@F1@) occurs between a parent and their descendent Daniel /Glasgow/ (@I3@)."
-        #Display.noSiblingMarriage(self.db)
+        Display.noSiblingMarriage(self.db)
+        self.db.commit()
         self.assertEqual(expectedPrintout, self.capturedOutput.getvalue())
 
     def test_US18(self):
@@ -1210,12 +1207,12 @@ class Tester(unittest.TestCase):
         Display.populateAge(self.db)
         expectedPrintout = "Anomaly US18: Marriage (@F2@) occurs between siblings Daniel /Glasgow/ (@I5@) and Ryan /Lewis/ (@I4@).\n"
         Display.noSiblingMarriage(self.db)
+        self.db.commit()
         self.assertEqual(expectedPrintout, self.capturedOutput.getvalue())
 
     def test_US21(self):
-        self_db.build(rebuild=True)
-        ged_lines = """
-            0 @I1@ INDI
+        self.db.build(rebuild=True)
+        ged_lines = """0 @I1@ INDI
             1 NAME Mark /Glasgow/
             2 GIVN Mark
             2 SURN Glasgow
@@ -1245,11 +1242,11 @@ class Tester(unittest.TestCase):
             1 EVEN
             2 TYPE Ending
             1 _CURRENT N
-            0 TRLR
-        """
+            0 TRLR"""
         Ingest.ingest_lines(self.db, ged_lines.split('\n'))
         Display.populateAge(self.db)
         expectedPrintout = "Anomaly US 21: Husband Mark /Glasgow/ (@I1@) has gender F."
+        self.db.commit()
         self.assertEqual(expectedPrintout, self.capturedOutput.getvalue())
 
     def test_US22(self):
@@ -1308,12 +1305,8 @@ class Tester(unittest.TestCase):
         Ingest.ingest_lines(self.db, ged_lines.split('\n'))
         Display.populateAge(self.db)
         expectedPrintout = "Anomaly US 22: Individual ID (@I1@) is not unique.\nAnomaly US 22: Family ID (@F1@) is not unique.\n"
+        self.db.commit()
         self.assertEqual(expectedPrintout, self.capturedOutput.getvalue())
-
-    def tearDown(self) -> None:
-        sys.stdout = sys.__stdout__  # Un-redirect stdout
-        # print(self.capturedOutput.getvalue())
 
 if __name__ == '__main__':
     unittest.main()
-    sys.stdout = sys.__stdout__

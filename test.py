@@ -577,9 +577,8 @@ class Tester(unittest.TestCase):
             1 _CURRENT Y
             0 TRLR"""
         Ingest.ingest_lines(self.db, ged_lines.split('\n'))
-        Display.populateAge(self.db)
-        Display.parentsNotTooOld(self.db)
-        expectedPrintout = """Anomaly US13: Siblings Daniel Glasgow (@I3@) and Thomas Glasgow (@I4@) were born 7 months of each other and are not twins."""
+        Display.siblingSpacing(self.db)
+        expectedPrintout = """Anomaly US13: Siblings Daniel /Glasgow/ (@I3@) and Thomas /Glasgow/ (@I4@) were born within 7 months of each other and are not twins.\nAnomaly US13: Siblings Thomas /Glasgow/ (@I4@) and Daniel /Glasgow/ (@I3@) were born within 7 months of each other and are not twins.\n"""
         self.db.commit()
         self.assertEqual(expectedPrintout, self.capturedOutput.getvalue())
         
@@ -1068,7 +1067,7 @@ class Tester(unittest.TestCase):
             0 TRLR"""
 
         Ingest.ingest_lines(self.db, ged_lines.split('\n'))
-        Display.populateAge(self.db)
+        Display.maleLastNames(self.db)
         expectedPrintout = "Anomaly US16: Son Daniel /Lewis/ (@I3@) doesn't have the same last name as his father Mark /Glasgow/ (@I1@) of family @F1@.\n"
         self.assertEqual(expectedPrintout, self.capturedOutput.getvalue())
 
@@ -1126,8 +1125,8 @@ class Tester(unittest.TestCase):
             0 TRLR"""
         Ingest.ingest_lines(self.db, ged_lines.split('\n'))
         Display.populateAge(self.db)
-        expectedPrintout = "Anomaly US17: Marriage (@F1@) occurs between a parent and their descendent Daniel /Glasgow/ (@I3@)."
-        Display.noSiblingMarriage(self.db)
+        expectedPrintout = "Anomaly US17: Marriage (@F1@) occurs between a parent and their descendent Daniel /Glasgow/ (@I3@).\n"
+        Display.noDescendentMarriage(self.db)
         self.db.commit()
         self.assertEqual(expectedPrintout, self.capturedOutput.getvalue())
 
@@ -1228,7 +1227,7 @@ class Tester(unittest.TestCase):
             2 GIVN Lisa
             2 SURN Wilson
             2 _MARNM Glasgow
-            1 SEX M
+            1 SEX F
             1 BIRT
             2 DATE 8 APR 1942
             1 DEAT Y
@@ -1244,8 +1243,8 @@ class Tester(unittest.TestCase):
             1 _CURRENT N
             0 TRLR"""
         Ingest.ingest_lines(self.db, ged_lines.split('\n'))
-        Display.populateAge(self.db)
-        expectedPrintout = "Anomaly US 21: Husband Mark /Glasgow/ (@I1@) has gender F."
+        Display.genderRole(self.db)
+        expectedPrintout = "Anomaly US21: Husband Mark /Glasgow/ (@I1@) has gender F.\n"
         self.db.commit()
         self.assertEqual(expectedPrintout, self.capturedOutput.getvalue())
 

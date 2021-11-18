@@ -541,7 +541,7 @@ def display(db):
     # Run user stories...
     # Sprint 2
     birthBeforeParentDeath(db)
-    marriageAfter14(db)
+    #marriageAfter14(db)
     noBigamy(db)
     parentsNotTooOld(db)
     siblingSpacing(db)

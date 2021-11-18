@@ -1067,7 +1067,7 @@ class Tester(unittest.TestCase):
             0 TRLR"""
 
         Ingest.ingest_lines(self.db, ged_lines.split('\n'))
-        Display.populateAge(self.db)
+        Display.maleLastNames(self.db)
         expectedPrintout = "Anomaly US16: Son Daniel /Lewis/ (@I3@) doesn't have the same last name as his father Mark /Glasgow/ (@I1@) of family @F1@.\n"
         self.assertEqual(expectedPrintout, self.capturedOutput.getvalue())
 

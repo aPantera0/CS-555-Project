@@ -170,7 +170,6 @@ def birthBeforeMarriageOfParents(db):
         if person['birthday'] and person['marrydate'] and person['birthday'] < person['marrydate']:
             print(f"Anomaly US08: Birth date of {person['name']} ({person['iid']}) occurs before the marriage date of their parents in Family {person['mid']}.")
 
-
 def birthBeforeParentDeath(db):
     #US09
     # Child should be born before death of mother
@@ -441,7 +440,6 @@ def noDescendentMarriage(db):
             if ((child['cid'] == marriage['hid'] or child['cid'] == marriage['wid']) and (child['fid'] == marriage['hid'])):
                 print(f"Anomaly US17: Marriage ({marriage['mid']}) occurs between a parent and their descendent {child['cname']} ({child['cid']}).")
 
-
 def noSiblingMarriage(db):
     #US 18
     #No siblings should be married to each other
@@ -466,6 +464,11 @@ def noSiblingMarriage(db):
     for i in db.query(query):
         marriage = dict(zip(['mid', 'husband', 'hname', 'wife', 'wname'], i))
         print(f"Anomaly US18: Marriage ({marriage['mid']}) occurs between siblings {marriage['hname']} ({marriage['husband']}) and {marriage['wname']} ({marriage['wife']}).")
+
+def auntsAndUncles(db):
+    #US20
+    # Aunts and uncles should not marry their nieces or nephews
+    pass
 
 def genderRole(db):
     #US 21

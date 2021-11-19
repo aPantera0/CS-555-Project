@@ -425,19 +425,19 @@ def noDescendentMarriage(db):
         WHERE h.name IS NOT NULL AND w.name IS NOT NULL
     """
     query2 = """
-        SELECT c.name, c.iid, c.parentmarriage, h.name, h.iid, w.name
+        SELECT c.name, c.iid, c.parentmarriage, h.name, h.iid, w.name, w.iid
         FROM individuals c LEFT JOIN marriages m on c.parentmarriage=m.mid
             LEFT JOIN individuals h on h.iid=m.hid
             LEFT JOIN individuals w on w.iid=m.wid
-        WHERE c.name IS NOT NULL AND h.name IS NOT NULL AND w.name IS NOT NULL
+        WHERE c.name IS NOT NULL AND h.name IS NOT NULL AND w.name IS NOT NULL AND w.iid IS NOT NULL
     """
     for i in db.query(query1):
-        marriage = dict(zip(['hname', 'hid', 'wname', 'wid' 'mid'], i))
+        marriage = dict(zip(['hname', 'hid', 'wname', 'wid', 'mid'], i))
         for j in db.query(query2):
-            child = dict(zip(['cname', 'cid', 'cpm', 'fname', 'fid', 'mname'], i))
-            # print(f"hname:{marriage['hname']} hid:{marriage['hid']} wname:{marriage['wname']}  ")
-            # print(f"cname:{child['cname']} cid:{child['cid']} cpm:{child['cpm']} fname:{child['fname']} fid:{child['fid']}")
-            if ((child['cid'] == marriage['hid'] or child['cid'] == marriage['wid']) and (child['fid'] == marriage['hid'])):
+            child = dict(zip(['cname', 'cid', 'cpm', 'fname', 'fid', 'mname', 'mmid'], j))
+            #print(marriage)
+            #print(child)
+            if ((child['cid'] == marriage['hid'] or child['cid'] == marriage['wid']) and (child['fid'] == marriage['hid']) or child['mmid'] == marriage['wid']):
                 print(f"Anomaly US17: Marriage ({marriage['mid']}) occurs between a parent and their descendent {child['cname']} ({child['cid']}).")
 
 def noSiblingMarriage(db):

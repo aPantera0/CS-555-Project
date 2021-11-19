@@ -1123,7 +1123,7 @@ class Tester(unittest.TestCase):
             0 TRLR"""
         Ingest.ingest_lines(self.db, ged_lines.split('\n'))
         Display.populateAge(self.db)
-        expectedPrintout = "Anomaly US17: Marriage (@F1@) occurs between a parent and their descendent Daniel /Glasgow/ (@I3@)\n"
+        expectedPrintout = "Anomaly US17: Marriage (@F2@) occurs between a parent and their descendent Daniel /Glasgow/ (@I3@).\n"
         Display.noDescendentMarriage(self.db)
         self.db.commit()
         self.assertEqual(expectedPrintout, self.capturedOutput.getvalue())

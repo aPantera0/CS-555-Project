@@ -435,8 +435,6 @@ def noDescendentMarriage(db):
         marriage = dict(zip(['hname', 'hid', 'wname', 'wid', 'mid'], i))
         for j in db.query(query2):
             child = dict(zip(['cname', 'cid', 'cpm', 'fname', 'fid', 'mname', 'mmid'], j))
-            #print(marriage)
-            #print(child)
             if ((child['cid'] == marriage['hid'] or child['cid'] == marriage['wid']) and (child['fid'] == marriage['hid']) or child['mmid'] == marriage['wid']):
                 print(f"Anomaly US17: Marriage ({marriage['mid']}) occurs between a parent and their descendent {child['cname']} ({child['cid']}).")
 
@@ -580,7 +578,6 @@ def uniqueNameAndBTD(db):
         person = dict(zip(['iid1', 'name1', 'birthday1', 'iid2', 'name2', 'birthday2'], i))
         print(f"Anomaly US23: Individual {person['iid1']} has the same name and birth date as Individual {person['iid2']} with name {person['name1']} and birth date {person['birthday1']}")
     
-
 def uniqueFamilySpouses(db):
     #US 24
     # No more than one family with the same spouses by name 
@@ -605,8 +602,6 @@ def uniqueFamilySpouses(db):
             print(f"Anomaly US24: Husband {hname} ({hiid}) and wife {wname} ({wiid}) were married on date {marrydate} more than once.")
         else:
             marriages.add(key)
-
-
 
 def display(db):
     # Display SQL tables...

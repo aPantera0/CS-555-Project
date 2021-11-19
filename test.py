@@ -1069,6 +1069,7 @@ class Tester(unittest.TestCase):
         Ingest.ingest_lines(self.db, ged_lines.split('\n'))
         Display.maleLastNames(self.db)
         expectedPrintout = "Anomaly US16: Son Daniel /Lewis/ (@I3@) doesn't have the same last name as his father Mark /Glasgow/ (@I1@) of family @F1@.\n"
+        self.db.commit()
         self.assertEqual(expectedPrintout, self.capturedOutput.getvalue())
 
     def test_US17(self):
@@ -1209,6 +1210,147 @@ class Tester(unittest.TestCase):
         self.db.commit()
         self.assertEqual(expectedPrintout, self.capturedOutput.getvalue())
 
+    def test_US20(self):
+        self.db.build(rebuild=True)
+        ged_lines = """0 NOTE https://github.com/aPantera0/CS-555-Project
+            1 GEDC
+            2 VERS 5.5.1
+            0 @I1@ INDI
+            1 NAME Mark /Glasgow/
+            2 GIVN Mark
+            2 SURN Glasgow
+            2 _MARNM Glasgow
+            1 SEX M
+            1 BIRT
+            2 DATE 3 MAY 1942
+            1 DEAT Y
+            2 DATE 5 DEC 2010
+            1 FAMS @F1@
+            0 @I2@ INDI
+            1 NAME Lisa /Wilson/
+            2 GIVN Lisa
+            2 SURN Wilson
+            2 _MARNM Glasgow
+            1 SEX F
+            1 BIRT
+            2 DATE 8 APR 1942
+            1 DEAT Y
+            2 DATE 12 JAN 2021
+            1 FAMS @F1@
+            1 FAMS @F2@
+            0 @I3@ INDI
+            1 NAME Daniel /Glasgow/
+            2 GIVN Daniel
+            2 SURN Glasgow
+            2 _MARNM Glasgow
+            1 SEX M
+            1 BIRT
+            2 DATE 18 OCT 1973
+            1 FAMS @F3@
+            1 FAMS @F4@
+            1 FAMC @F1@
+            0 @I4@ INDI
+            1 NAME Annabelle /Glasgow/
+            2 GIVN Annabelle
+            2 SURN Glasgow
+            2 _MARNM Edison
+            1 SEX F
+            1 BIRT
+            2 DATE 30 JUL 1969
+            1 FAMC @F1@
+            0 @I5@ INDI
+            1 NAME Elizabeth /Redington/
+            2 GIVN Elizabeth
+            2 SURN Redington
+            2 _MARNM Glasgow
+            1 SEX F
+            1 BIRT
+            2 DATE 6 DEC 1968
+            1 FAMS @F4@
+            0 @I6@ INDI
+            1 NAME Michael /Glasgow/
+            2 GIVN Michael
+            2 SURN Glasgow
+            2 _MARNM Glasgow
+            1 SEX M
+            1 BIRT
+            2 DATE 6 OCT 2000
+            1 FAMC @F4@
+            0 @I7@ INDI
+            1 NAME Jennifer /Broome/
+            2 GIVN Jennifer
+            2 SURN Broome
+            2 _MARNM Glasgow
+            1 SEX F
+            1 BIRT
+            2 DATE 9 OCT 1985
+            1 FAMS @F3@
+            0 @I8@ INDI
+            1 NAME Maryann /Glasgow/
+            2 GIVN Maryann
+            2 SURN Glasgow
+            2 _MARNM Glasgow
+            1 SEX F
+            1 BIRT
+            2 DATE 13 DEC 2002
+            1 FAMC @F3@
+            0 @I9@ INDI
+            1 NAME Robert /Griffith/
+            2 GIVN Robert
+            2 SURN Griffith
+            2 _MARNM Griffith
+            1 SEX M
+            1 BIRT
+            2 DATE 8 JUL 1985
+            1 FAMS @F2@
+            0 @F1@ FAM
+            1 HUSB @I1@
+            1 WIFE @I2@
+            1 CHIL @I3@
+            1 CHIL @I4@
+            1 MARR
+            2 DATE 3 AUG 1961
+            1 EVEN
+            2 TYPE Ending
+            1 _CURRENT N
+            0 @F2@ FAM
+            1 HUSB @I9@
+            1 WIFE @I2@
+            1 MARR
+            2 DATE 2 OCT 2019
+            1 _CURRENT Y
+            0 @F3@ FAM
+            1 HUSB @I3@
+            1 WIFE @I7@
+            1 CHIL @I8@
+            1 MARR
+            2 DATE 4 NOV 2003
+            1 _CURRENT Y
+            0 @F4@ FAM
+            1 HUSB @I3@
+            1 WIFE @I5@
+            1 CHIL @I6@
+            1 MARR
+            2 DATE 9 SEP 1995
+            1 DIV
+            2 DATE 8 OCT 2002
+            1 _CURRENT N
+            0 @F5@ FAM
+            1 HUSB @I4@
+            1 WIFE @I8@
+            1 MARR
+            2 DATE 9 SEP 1995
+            1 DIV
+            2 DATE 8 OCT 2002
+            1 _CURRENT N
+            0 TRLR"""
+        Ingest.ingest_lines(self.db, ged_lines.split('\n'))
+        Display.populateAge(self.db)
+        Display.auntsAndUncles(self.db)
+        expectedPrintout = "Anomaly US20: Aunt/Uncle Annabelle /Glasgow/ (@I4@) married their niece/nephew Maryann /Glasgow/ (@I8@).\n"
+        self.db.commit()
+        self.assertEqual(expectedPrintout, self.capturedOutput.getvalue())
+
     def test_US21(self):
         self.db.build(rebuild=True)
         ged_lines = """0 @I1@ INDI
@@ -1306,6 +1448,82 @@ class Tester(unittest.TestCase):
         expectedPrintout = "Anomaly US 22: Individual ID (@I1@) is not unique.\nAnomaly US 22: Family ID (@F1@) is not unique.\n"
         self.db.commit()
         self.assertEqual(expectedPrintout, self.capturedOutput.getvalue())
+
+    def test_US20(self):
+        self.db.build(rebuild=True)
+        ged_lines = """0 NOTE https://github.com/aPantera0/CS-555-Project
+            1 GEDC
+            2 VERS 5.5.1
+            0 @I1@ INDI
+            1 NAME Mark /Glasgow/
+            2 GIVN Mark
+            2 SURN Glasgow
+            2 _MARNM Glasgow
+            1 SEX M
+            1 BIRT
+            2 DATE 3 MAY 1942
+            1 DEAT Y
+            2 DATE 5 DEC 2010
+            1 FAMS @F1@
+            0 @I2@ INDI
+            1 NAME Lisa /Wilson/
+            2 GIVN Lisa
+            2 SURN Wilson
+            2 _MARNM Glasgow
+            1 SEX F
+            1 BIRT
+            2 DATE 8 APR 1942
+            1 DEAT Y
+            2 DATE 12 JAN 2021
+            1 FAMS @F1@
+            1 FAMS @F2@
+            0 @I3@ INDI
+            1 NAME Mark /Glasgow/
+            2 GIVN Mark
+            2 SURN Glasgow
+            2 _MARNM Glasgow
+            1 SEX M
+            1 BIRT
+            2 DATE 3 MAY 1942
+            1 DEAT Y
+            2 DATE 5 DEC 2010
+            1 FAMS @F2@
+            0 @I4@ INDI
+            1 NAME Lisa /Wilson/
+            2 GIVN Lisa
+            2 SURN Wilson
+            2 _MARNM Glasgow
+            1 SEX F
+            1 BIRT
+            2 DATE 8 APR 1942
+            1 DEAT Y
+            2 DATE 12 JAN 2021
+            1 FAMS @F2@
+            0 @F1@ FAM
+            1 HUSB @I1@
+            1 WIFE @I2@
+            1 MARR
+            2 DATE 3 AUG 1961
+            1 EVEN
+            2 TYPE Ending
+            1 _CURRENT N
+            0 @F2@ FAM
+            1 HUSB @I3@
+            1 WIFE @I4@
+            1 MARR
+            2 DATE 3 AUG 1961
+            1 EVEN
+            2 TYPE Ending
+            1 _CURRENT N
+            0 TRLR"""
+        Ingest.ingest_lines(self.db, ged_lines.split('\n'))
+        Display.populateAge(self.db)
+        Display.uniqueFamilySpouses(self.db)
+        expectedPrintout = "Anomaly US24: Husband Mark /Glasgow/ (@I3@) and wife Lisa /Wilson/ (@I4@) were married on date 1961-08-03 more than once.\n"
+        self.db.commit()
+        self.assertEqual(expectedPrintout, self.capturedOutput.getvalue())
+
+
 
 if __name__ == '__main__':
     unittest.main()

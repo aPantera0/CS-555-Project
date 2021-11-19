@@ -435,8 +435,8 @@ def noDescendentMarriage(db):
         marriage = dict(zip(['hname', 'hid', 'wname', 'wid' 'mid'], i))
         for j in db.query(query2):
             child = dict(zip(['cname', 'cid', 'cpm', 'fname', 'fid', 'mname'], i))
-            print(f"hname:{marriage['hname']} hid:{marriage['hid']} wname:{marriage['wname']}  ")
-            print(f"cname:{child['cname']} cid:{child['cid']} cpm:{child['cpm']} fname:{child['fname']} fid:{child['fid']}")
+            # print(f"hname:{marriage['hname']} hid:{marriage['hid']} wname:{marriage['wname']}  ")
+            # print(f"cname:{child['cname']} cid:{child['cid']} cpm:{child['cpm']} fname:{child['fname']} fid:{child['fid']}")
             if ((child['cid'] == marriage['hid'] or child['cid'] == marriage['wid']) and (child['fid'] == marriage['hid'])):
                 print(f"Anomaly US17: Marriage ({marriage['mid']}) occurs between a parent and their descendent {child['cname']} ({child['cid']}).")
 
@@ -468,7 +468,65 @@ def noSiblingMarriage(db):
 def auntsAndUncles(db):
     #US20
     # Aunts and uncles should not marry their nieces or nephews
-    pass
+    # First we get all possible triplets of grandparent, parent, and child, and then
+    # Then, For each grandparent, 
+    #   For each of of that grandparents kids
+    #       For each of their kids
+    #           If that kid is married to any of the grandparents' other kids
+    #               throw the anomoly 
+
+    # Get triplets
+    tripletsQuery = """SELECT
+        grand.name as Grandparent, grand.iid, parent.name as Parent, parent.iid, child.name as Child, child.iid
+    FROM 
+        individuals grand 
+    LEFT JOIN 
+        marriages mg ON mg.hid=grand.iid OR mg.wid=grand.iid 
+    LEFT JOIN 
+        individuals parent ON parent.parentmarriage = mg.mid
+    LEFT JOIN 
+        marriages mp ON mp.hid=parent.iid OR mp.wid=parent.iid 
+    LEFT JOIN 
+        individuals child ON child.parentmarriage = mp.mid"""
+    triplets = []
+    grandparents = {} # a mapping of grandparent iids to lists of triplets
+    for triplet in db.query(tripletsQuery):
+        # triplet = dict(zip(['gname', 'gid', 'pname', 'pid', 'cname', 'cid'], i))
+        triplets.append(triplet)
+        if triplet[1] in grandparents:
+            grandparents[triplet[1]] = grandparents[triplet[1]] + [triplet]
+        else:
+            grandparents[triplet[1]] = [triplet]
+    
+    # Get marriages
+    marriagesQuery = """SELECT
+        h.iid, w.iid
+    FROM 
+        marriages m
+    LEFT JOIN 
+        individuals h on m.hid=h.iid
+    LEFT JOIN 
+        individuals w on m.wid=w.iid"""
+    marriages = {} # a mapping of hisband ids to a list of wife ids, and from wife ids to a list of husband ids
+    for hid, wid in db.query(marriagesQuery):
+        if hid and wid:
+            if hid in marriages:
+                marriages[hid] = marriages[hid] + [wid]
+            else:
+                marriages[hid] = [wid]
+            if wid in marriages:
+                marriages[wid] = marriages[wid] + [hid]
+            else:
+                marriages[wid] = [hid]
+
+    anomalies = set()
+    for gname, gid, pname, pid, cname, cid in triplets:
+        for _, _, auncleName, auncleId, _, _ in grandparents[gid]:
+            if auncleId != pid:
+                if (auncleId in marriages and cid in marriages[auncleId]) or (cid in marriages and auncleId in marriages[cid]):
+                    anomalies.add(f"Anomaly US20: Aunt/Uncle {auncleName} ({auncleId}) married their niece/nephew {cname} ({cid}).")
+
+    list(map(print, anomalies))
 
 def genderRole(db):
     #US 21
@@ -487,40 +545,37 @@ def genderRole(db):
         if (marriage['wgender'] == 'M'):
             print(f"Anomaly US21: Wife {marriage['wname']} ({marriage['wid']}) has gender M.")
 
-
-#def uniqueIDs(db):
-#    #US 22 is NOW IN INGEST.PY
-#    #All individual IDs should be unique and all family IDs should be unique
-#    
-#    #gets all duplicate individual IDs
-#    query1 = """
-#        SELECT iid, count(iid) number
-#        FROM individuals
-#        GROUP BY iid
-#        HAVING count(iid) > 1
-#    """
-#    #outputs all non-unique individual IDs
-#    for i in db.query(query1):
-#        individualID = dict(zip(['iid', 'number']))
-#        print(f"Anomaly US 22: Individual ID ({individualID['iid']}) is not unique, with a number of {individualID['number']} occurrences within the GEDCOM file.")
-#
-#    #gets all duplicate family IDs
-#    query2 = """
-#        SELECT mid, count(mid) number
-#        FROM marriages
-#        GROUP BY mid
-#        HAVING count(mid) > 1    
-#    """
-#    #outputs all non-unique family IDs
-#    for i in db.query(query2):
-#        familyID = dict(zip(['mid', 'number']))
-#        print(f"Anomaly US 22: Family ID ({familyID['mid']}) is not unique, with a number of {familyID['number']} occurrences within the GEDCOM file.")
+def uniqueIDs(db):
+    # US 22 
+    # Implemented upon ingest in ingest.py
+    pass
 
 def uniqueFamilySpouses(db):
     #US 24
-    #No more than one family with the same spouses
-    #by name and the same marriage date should appear in the GEDCOM file
-    pass
+    # No more than one family with the same spouses by name 
+    # and the same marriage date should appear in the GEDCOM file
+    # the marriages table is keyed by the IDs, so that shouldn't conflict with this user story 
+    query = """
+        SELECT 
+            h.name, h.iid, w.name, w.iid, m.mid, m.marrydate
+        FROM 
+            marriages m 
+        LEFT JOIN 
+            individuals h on m.hid=h.iid
+        LEFT JOIN 
+            individuals w on m.wid=w.iid
+        WHERE 
+            h.name IS NOT NULL AND w.name IS NOT NULL"""
+    # hname, hiid, wname, wiid, mmid, mmarrydate
+    marriages = set()
+    for hname, hiid, wname, wiid, mmid, marrydate in db.query(query):
+        key = (hname, wname, marrydate)
+        if key in marriages:
+            print(f"Anomaly US24: Husband {hname} ({hiid}) and wife {wname} ({wiid}) were married on date {marrydate} more than once.")
+        else:
+            marriages.add(key)
+
+
 
 def display(db):
     # Display SQL tables...
@@ -541,7 +596,7 @@ def display(db):
     # Run user stories...
     # Sprint 2
     birthBeforeParentDeath(db)
-    #marriageAfter14(db)
+    marriageAfter14(db)
     noBigamy(db)
     parentsNotTooOld(db)
     siblingSpacing(db)
@@ -556,11 +611,11 @@ def display(db):
     #US 18 No marriages to siblings
     noSiblingMarriage(db)
     #US 19 First cousins should not marry
-    #US 20 Aunts and Uncles
+    auntsAndUncles(db)
     #US 21 Correct gender for role
     genderRole(db)
     #US 23 Unique name and birth date
-    #US 24 Unique families by spouses
+    uniqueFamilySpouses(db)
 
 if __name__ == "__main__":
     db = Database.Database(rebuild=False)

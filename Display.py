@@ -467,6 +467,23 @@ def noSiblingMarriage(db):
         marriage = dict(zip(['mid', 'husband', 'hname', 'wife', 'wname'], i))
         print(f"Anomaly US18: Marriage ({marriage['mid']}) occurs between siblings {marriage['hname']} ({marriage['husband']}) and {marriage['wname']} ({marriage['wife']}).")
 
+def cousinsNotMarry(db):
+    # US 19
+    # First cousins should not marry one another
+
+    query = """
+    WITH siblings as (
+        SELECT i.iid i1, i.name i1name, j.iid i2, j.name i2name, i.parentmarriage
+        FROM individuals i, individuals j
+        WHERE i.parentmarriage = j.parentmarriage AND i.iid <> j.iid
+    )
+        SELECT a.iid, a.name, b.iid, b.name, f.mid
+        FROM individuals a, marriages f, individuals b, siblings s, marriages q, marriages w
+        WHERE f.hid = a.iid and b.iid = f.wid and q.mid = a.parentmarriage and w.mid = b.parentmarriage and ((q.hid = s.i1 or q.wid = s.i1) AND (w.hid = s.i2 or w.wid = s.i2))
+    """
+    for i in db.query(query):
+        marriage = dict(zip(['hid', 'hname', 'wid', 'wname', 'mid'], i))
+        print(f"Anomaly US19: Marraige: Marriage ({marriage['mid']}) occurs between first counsins {marriage['hname']} ({marriage['hid']}) and {marriage['wname']} ({marriage['wid']})")
 def genderRole(db):
     #US 21
     #Correct gender for role
@@ -513,6 +530,20 @@ def genderRole(db):
 #        familyID = dict(zip(['mid', 'number']))
 #        print(f"Anomaly US 22: Family ID ({familyID['mid']}) is not unique, with a number of {familyID['number']} occurrences within the GEDCOM file.")
 
+def uniqueNameAndBTD(db):
+    #US 23
+    #No more than one individual with the same name and birth date should appear in a GEDCOM file
+
+    query = """
+        SELECT i.iid, i.name, i.birthday, j.iid, j.name, j.birthday
+        FROM individuals i, individuals j
+        WHERE i.name = j.name AND i.birthday = j.birthday AND i.iid <> j.iid
+    """
+    for i in db.query(query):
+        person = dict(zip(['iid1', 'name1', 'birthday1', 'iid2', 'name2', 'birthday2'], i))
+        print(f"Anomaly US23: Individual {person['iid1']} has the same name and birth date as Individual {person['iid2']} with name {person['name1']} and birth date {person['birthday1']}")
+    
+
 def uniqueFamilySpouses(db):
     #US 24
     #No more than one family with the same spouses
@@ -553,10 +584,12 @@ def display(db):
     #US 18 No marriages to siblings
     noSiblingMarriage(db)
     #US 19 First cousins should not marry
+    cousinsNotMarry(db)
     #US 20 Aunts and Uncles
     #US 21 Correct gender for role
     genderRole(db)
     #US 23 Unique name and birth date
+    uniqueNameAndBTD(db)
     #US 24 Unique families by spouses
 
 if __name__ == "__main__":

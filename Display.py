@@ -603,6 +603,74 @@ def uniqueFamilySpouses(db):
         else:
             marriages.add(key)
 
+def uniqueFirstNames(db):
+    #US 25
+    #No more than one child with the same name and birth date should
+    #appear in a family
+    query = """
+        SELECT c.name, c.iid, c.birthday
+        FROM marriages m
+            LEFT JOIN individuals c ON c.parentmarriage=m.mid
+        WHERE c.name IS NOT NULL
+    """
+    for i in db.query(query):
+        child1 = dict(zip(['name1', 'iid1', 'birthday1']), i)
+        for j in db.query(query):
+            child2 = dict(zip(['name2', 'iid2', 'birthday2']), j)
+            if (child1['name1'] == child2['name2']
+            and child1['birthday1'] == child2['birthday2']
+            and not child1['iid1'] == child2['iid2']):
+                print(f"Anomaly US25: Child {child1['name1']} appears more than once in the same family.")
+                break
+
+def correspondingEntries(db):
+    #US 26
+    #All family roles (spouse, child) specified in an individual record should have
+    #corresponding family records. Likewise, all individual roles (spouse, child)
+    #specified in family records should have corresponding entries in the corresponding
+    #individual's records. I.e. the information in the individual and family records
+    #should be consistent.
+    return 0
+
+def individualAges(db):
+    #US 27
+    #Include person's current age when listing individuals
+    return 0
+
+def orderSiblingsAge(db):
+    #US 28
+    #List siblings in families by decreasing age, i.e. oldest siblings first
+    return 0
+
+def listDeceased(db):
+    #US 29
+    #List all deceased individuals in a GEDCOM file
+    query = """
+        SELECT i.name, i.iid
+        FROM individuals i
+        WHERE i.alive is False
+    """
+    print("US29 - List of all deceased individuals: ")
+    for i in db.query(query):
+        person = dict(zip(['name', 'iid'], i))
+        print(f"{person[name]} ({person[iid]})")
+    print("End of US29.")
+
+def listLivingMarried(db):
+    #US 30
+    #List all living married people in a GEDCOM file
+    return 0
+
+def listLivingSingle(db):
+    #US 31
+    #List all living people over 30 who have never been married in a GEDCOM file
+    return 0
+
+def listMultipleBirths(db):
+    #US 32
+    #List all multiple births in a GEDCOM file
+    return 0
+
 def display(db):
     # Display SQL tables...
     populateAge(db)

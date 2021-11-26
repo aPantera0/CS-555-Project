@@ -1809,5 +1809,183 @@ class Tester(unittest.TestCase):
         self.db.commit()
         self.assertEqual(expectedPrintout, self.capturedOutput.getvalue())
 
+    def test_US25(self):
+        self.db.build(rebuild=True)
+        ged_lines = """0 @I1@ INDI
+            1 NAME Lisa /Wilson/
+            2 GIVN Lisa
+            2 SURN Wilson
+            2 _MARNM Glasgow
+            1 SEX F
+            1 BIRT
+            2 DATE 8 APR 1942
+            1 DEAT Y
+            2 DATE 12 JAN 1982
+            1 FAMS @F1@
+            0 @I2@ INDI
+            1 NAME Mark /Glasgow/
+            2 GIVN Mark
+            2 SURN Glasgow
+            2 _MARNM Glasgow
+            1 SEX M
+            1 BIRT
+            2 DATE 3 MAY 1942
+            1 DEAT Y
+            2 DATE 7 JUL 1986
+            1 FAMS @F1@
+            0 @I3@ INDI
+            1 NAME Daniel /Glasgow/
+            2 GIVN Daniel
+            2 SURN Glasgow
+            2 _MARNM Glasgow
+            1 SEX M
+            1 BIRT
+            2 DATE 11 JUL 1973
+            1 FAMC @F1@
+            0 @I4@ INDI
+            1 NAME Daniel /Glasgow/
+            2 GIVN Daniel
+            2 SURN Glasgow
+            2 _MARNM Glasgow
+            1 SEX M
+            1 BIRT
+            2 DATE 11 JUL 1973
+            1 FAMC @F1@
+            0 @F1@ FAM
+            1 HUSB @I2@
+            1 WIFE @I1@
+            1 CHIL @I3@
+            1 CHIL @I4@
+            1 _CURRENT Y
+            0 TRLR"""
+        Ingest.ingest_lines(self.db, ged_lines.split('\n'))
+        Display.populateAge(self.db)
+        Display.uniqueFirstNames(self.db)
+        expectedPrintout = "Anomaly US25: Child Daniel /Glasgow/ appears more than once in the same family.\n"
+        self.db.commit()
+        self.assertEqual(expectedPrintout, self.capturedOutput.getvalue())
+
+    def test_US26(self):
+        self.db.build(rebuild=True)
+        ged_lines = """0 NOTE https://github.com/aPantera0/CS-555-Project
+        """
+        Ingest.ingest_lines(self.db, ged_lines.split('\n'))
+        Display.populateAge(self.db)
+        Display.correspondingEntries(self.db)
+        expectedPrintout = ""
+        self.db.commit()
+        self.assertEqual(expectedPrintout, self.capturedOutput.getvalue())
+
+    def test_US27(self):
+        self.db.build(rebuild=True)
+        ged_lines = """0 NOTE https://github.com/aPantera0/CS-555-Project
+        """
+        Ingest.ingest_lines(self.db, ged_lines.split('\n'))
+        Display.populateAge(self.db)
+        Display.individualAges(self.db)
+        expectedPrintout = ""
+        self.db.commit()
+        self.assertEqual(expectedPrintout, self.capturedOutput.getvalue())
+
+    def test_US28(self):
+        self.db.build(rebuild=True)
+        ged_lines = """0 NOTE https://github.com/aPantera0/CS-555-Project
+        """
+        Ingest.ingest_lines(self.db, ged_lines.split('\n'))
+        Display.populateAge(self.db)
+        Display.orderSiblingsAge(self.db)
+        expectedPrintout = ""
+        self.db.commit()
+        self.assertEqual(expectedPrintout, self.capturedOutput.getvalue())
+
+    def test_US29(self):
+        self.db.build(rebuild=True)
+        ged_lines = """0 @I1@ INDI
+            1 NAME Lisa /Wilson/
+            2 GIVN Lisa
+            2 SURN Wilson
+            2 _MARNM Glasgow
+            1 SEX F
+            1 BIRT
+            2 DATE 8 APR 1942
+            1 DEAT Y
+            2 DATE 12 JAN 1982
+            1 FAMS @F1@
+            0 @I2@ INDI
+            1 NAME Mark /Glasgow/
+            2 GIVN Mark
+            2 SURN Glasgow
+            2 _MARNM Glasgow
+            1 SEX M
+            1 BIRT
+            2 DATE 3 MAY 1942
+            1 DEAT Y
+            2 DATE 7 JUL 1986
+            1 FAMS @F1@
+            0 @I3@ INDI
+            1 NAME Daniel /Glasgow/
+            2 GIVN Daniel
+            2 SURN Glasgow
+            2 _MARNM Glasgow
+            1 SEX M
+            1 BIRT
+            2 DATE 11 JUL 1973
+            1 FAMC @F1@
+            0 @I4@ INDI
+            1 NAME Thomas /Glasgow/
+            2 GIVN Thomas
+            2 SURN Glasgow
+            2 _MARNM Glasgow
+            1 SEX M
+            1 BIRT
+            2 DATE 15 MAY 1973
+            1 FAMC @F1@
+            0 @F1@ FAM
+            1 HUSB @I2@
+            1 WIFE @I1@
+            1 CHIL @I3@
+            1 CHIL @I4@
+            1 _CURRENT Y
+            0 TRLR"""
+        Ingest.ingest_lines(self.db, ged_lines.split('\n'))
+        Display.populateAge(self.db)
+        Display.listDeceased(self.db)
+        expectedPrintout = "US29: - List of all deceased individuals: \nLisa /Wilson/\nMark /Glasgow/\nEnd of US29.\n"
+        self.db.commit()
+        self.assertEqual(expectedPrintout, self.capturedOutput.getvalue())
+
+    def test_US30(self):
+        self.db.build(rebuild=True)
+        ged_lines = """0 NOTE https://github.com/aPantera0/CS-555-Project
+        """
+        Ingest.ingest_lines(self.db, ged_lines.split('\n'))
+        Display.populateAge(self.db)
+        Display.listLivingMarried(self.db)
+        expectedPrintout = ""
+        self.db.commit()
+        self.assertEqual(expectedPrintout, self.capturedOutput.getvalue())
+
+    def test_US31(self):
+        self.db.build(rebuild=True)
+        ged_lines = """0 NOTE https://github.com/aPantera0/CS-555-Project
+        """
+        Ingest.ingest_lines(self.db, ged_lines.split('\n'))
+        Display.populateAge(self.db)
+        Display.listLivingSingle(self.db)
+        expectedPrintout = ""
+        self.db.commit()
+        self.assertEqual(expectedPrintout, self.capturedOutput.getvalue())
+
+    def test_US32(self):
+        self.db.build(rebuild=True)
+        ged_lines = """0 NOTE https://github.com/aPantera0/CS-555-Project
+        """
+        Ingest.ingest_lines(self.db, ged_lines.split('\n'))
+        Display.populateAge(self.db)
+        Display.listMultipleBirths(self.db)
+        expectedPrintout = ""
+        self.db.commit()
+        self.assertEqual(expectedPrintout, self.capturedOutput.getvalue())
+
 if __name__ == '__main__':
     unittest.main()

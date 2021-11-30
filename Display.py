@@ -698,16 +698,27 @@ def display(db):
     fewerThanFifteenSiblings(db)
     maleLastNames(db)
 
-    #Run user stories...
-    #Sprint 3
+    # Run user stories...
+    # Sprint 3
     noDescendentMarriage(db) #US17 No marriages to descendants
     noSiblingMarriage(db) #US18 No marriages to siblings
     cousinsNotMarry(db) #US19 First cousins should not marry   
     auntsAndUncles(db) # US20 
     genderRole(db) #US21
-    #US22 implemented in ingest.py
+    # US22 implemented in ingest.py
     uniqueNameAndBTD(db) #US 23 Unique name and birth date
     uniqueFamilySpouses(db) #US 24 Unique families by spouses
+
+    # Run user stories...
+    # Sprint 4
+    # uniqueFirstNames(db)
+    # correspondingEntries(db)
+    # individualAges(db)
+    # orderSiblingsAge(db)
+    # listDeceased(db)
+    # listLivingMarried(db)
+    # listLivingSingle(db)
+    # listMultipleBirths(db)
 
 if __name__ == "__main__":
     db = Database.Database(rebuild=False)

@@ -653,13 +653,34 @@ def listDeceased(db):
     print("US29 - List of all deceased individuals: ")
     for i in db.query(query):
         person = dict(zip(['name', 'iid'], i))
-        print(f"{person[name]} ({person[iid]})")
+        print(f"{person['name']} ({person['iid']})")
     print("End of US29.")
 
 def listLivingMarried(db):
     #US 30
     #List all living married people in a GEDCOM file
-    return 0
+    
+    #finds all alive and married individuals
+    query = """
+        WITH alive as (
+            SELECT iid, name
+            FROM individuals
+            WHERE alive = True
+        ), married as (
+            SELECT hid, wid
+            FROM marriages
+            WHERE divorced = False
+        )
+        SELECT a.name, a.iid
+        FROM alive a, marriages m
+        WHERE a.iid = m.hid OR a.iid = m.wid
+    """
+    #prints all living married people to screen
+    print("US30 - List of all living married individuals:\n")
+    for i in db.query(query):
+        person = dict(zip(['name', 'iid'], i))
+        print(f"{person['name']} ({person['iid']})\n")
+    print("End of US30.\n")
 
 def listLivingSingle(db):
     #US 31

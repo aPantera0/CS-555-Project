@@ -663,24 +663,24 @@ def listLivingMarried(db):
     #finds all alive and married individuals
     query = """
         WITH alive as (
-            SELECT iid, name
+            SELECT name, iid
             FROM individuals
-            WHERE alive = True
+            WHERE alive = 'True'
         ), married as (
             SELECT hid, wid
             FROM marriages
-            WHERE divorced = False
+            WHERE divorced = 'False'
         )
-        SELECT a.name, a.iid
-        FROM alive a, marriages m
-        WHERE a.iid = m.hid OR a.iid = m.wid
+        SELECT name, iid
+        FROM alive, married h, married w
+        WHERE iid = h.hid OR iid = w.wid
     """
     #prints all living married people to screen
-    print("US30 - List of all living married individuals:\n")
+    print("US30 - List of all living married individuals:")
     for i in db.query(query):
         person = dict(zip(['name', 'iid'], i))
-        print(f"{person['name']} ({person['iid']})\n")
-    print("End of US30.\n")
+        print(f"{person['name']} ({person['iid']})")
+    print("End of US30.")
 
 def listLivingSingle(db):
     #US 31

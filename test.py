@@ -1956,12 +1956,38 @@ class Tester(unittest.TestCase):
 
     def test_US30(self):
         self.db.build(rebuild=True)
-        ged_lines = """0 NOTE https://github.com/aPantera0/CS-555-Project
-        """
+        ged_lines = """0 @I1@ INDI
+            1 NAME Mark /Glasgow/
+            2 GIVN Mark
+            2 SURN Glasgow
+            2 _MARNM Glasgow
+            1 SEX M
+            1 BIRT
+            2 DATE 3 MAY 1942
+            1 FAMS @F1@
+            0 @I2@ INDI
+            1 NAME Lisa /Wilson/
+            2 GIVN Lisa
+            2 SURN Wilson
+            2 _MARNM Glasgow
+            1 SEX F
+            1 BIRT
+            2 DATE 8 APR 1942
+            1 FAMS @F1@
+            1 FAMS @F2@
+            0 @F1@ FAM
+            1 HUSB @I1@
+            1 WIFE @I2@
+            1 MARR
+            2 DATE 3 AUG 1961
+            1 EVEN
+            2 TYPE Ending
+            1 _CURRENT N
+            0 TRLR"""
         Ingest.ingest_lines(self.db, ged_lines.split('\n'))
         Display.populateAge(self.db)
         Display.listLivingMarried(self.db)
-        expectedPrintout = ""
+        expectedPrintout = "US30 - List of all living married individuals:\nMark /Glasgow/ (@I1@)\nLisa /Wilson/ (@I2@)\nEnd of US30."
         self.db.commit()
         self.assertEqual(expectedPrintout, self.capturedOutput.getvalue())
 

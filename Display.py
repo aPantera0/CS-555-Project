@@ -613,13 +613,16 @@ def uniqueFirstNames(db):
             LEFT JOIN individuals c ON c.parentmarriage=m.mid
         WHERE c.name IS NOT NULL
     """
+    seenList = []
     for i in db.query(query):
-        child1 = dict(zip(['name1', 'iid1', 'birthday1']), i)
+        child1 = dict(zip(['name1', 'iid1', 'birthday1'], i))
         for j in db.query(query):
-            child2 = dict(zip(['name2', 'iid2', 'birthday2']), j)
+            child2 = dict(zip(['name2', 'iid2', 'birthday2'], j))
             if (child1['name1'] == child2['name2']
             and child1['birthday1'] == child2['birthday2']
-            and not child1['iid1'] == child2['iid2']):
+            and not child1['iid1'] == child2['iid2']
+            and not child1['name1'] in seenList):
+                seenList.append(child1['name1'])
                 print(f"Anomaly US25: Child {child1['name1']} appears more than once in the same family.")
                 break
 
@@ -698,7 +701,7 @@ def listDeceased(db):
     query = """
         SELECT i.name, i.iid
         FROM individuals i
-        WHERE i.alive is False
+        WHERE i.alive = 'False'
     """
     print("US29 - List of all deceased individuals: ")
     for i in db.query(query):
@@ -782,11 +785,11 @@ def display(db):
 
     # Run user stories...
     # Sprint 4
-    # uniqueFirstNames(db)
+    uniqueFirstNames(db)
     # correspondingEntries(db)
     # individualAges(db)
     # orderSiblingsAge(db)
-    # listDeceased(db)
+    listDeceased(db)
     # listLivingMarried(db)
     # listLivingSingle(db)
     # listMultipleBirths(db)

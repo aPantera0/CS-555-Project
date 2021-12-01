@@ -630,7 +630,57 @@ def correspondingEntries(db):
     #specified in family records should have corresponding entries in the corresponding
     #individual's records. I.e. the information in the individual and family records
     #should be consistent.
-    return 0
+    
+    #for each family record, check to see if husband and wife exist
+    #for each individual, if parent marriage is given make sure it is within marriages table
+
+    #find all marriages that have no husband or wife
+    query1 = """
+        SELECT mid, hid, wid
+        FROM marriages
+        WHERE hid IS NULL OR wid IS NULL
+    """
+    
+    #find all marriages involving husbands not in individuals table
+    query2 = """
+        SELECT mid, hid
+        FROM marriages m LEFT JOIN individuals i ON m.hid = i.iid
+        WHERE m.hid IS NOT NULL AND i.iid IS NULL
+    """
+
+    #finds all marriages involving wifes not in individuals table
+    query3 = """
+        SELECT mid, wid
+        FROM marriages m LEFT JOIN individuals i ON m.wid = i.iid
+        WHERE m.wid IS NOT NULL AND i.iid IS NULL
+    """
+
+    #find all individuals with parentmarriage not in marriages table
+    query4 = """
+        SELECT i.name, i.iid, i.parentmarriage
+        FROM individuals i LEFT JOIN marriages m on i.parentmarriage = m.mid
+        WHERE i.parrentmarriage IS NOT NULL AND m.mid IS NULL
+    """
+    us26violations = []
+
+    for i in db.query(query1):
+        marriage = dict(zip(['mid', 'hid', 'wid'], i))
+        us26violations.append(f"Anomaly US26: Marriage ({marriage['mid']}) between husband ({marriage['hid']}) and wife ({marriage['wid']}) has only one individual.")
+
+    for i in db.query(query2):
+        marriage = dict(zip(['mid', 'hid'], i))
+        us26violations.append(f"Anomaly US26: Husband ({marriage['hid']}) in marriage ({marriage['hid']}) does not exist in individuals.")
+
+    for i in db.query(query3):
+        marriage = dict(zip(['mid', 'wid'], i))
+        us26violations.append(f"Anomaly US26: Wife ({marriage['wid']}) in marriage ({marriage['hid']}) does not exist in individuals.")
+
+    for i in db.query(query4):
+        child = dict(zip(['name', 'iid', 'parentmarriage'], i))
+        us26violations.append(f"Anomaly US26: {child['name']} ({child['iid']}) is the child of marriage ({child['parentmarriage']}), which does not exist in marriages.")
+
+    for i in us26violations:
+        print(us26violations[i])
 
 def individualAges(db):
     #US 27

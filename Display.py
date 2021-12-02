@@ -665,11 +665,6 @@ def correspondingEntries(db):
         WHERE i.parentmarriage IS NOT NULL AND m.mid IS NULL
     """
 
-    #finds all children that do not exist
-    query5 = """
-        
-    """
-
     for i in db.query(query1):
         marriage = dict(zip(['mid', 'hid', 'wid'], i))
         print(f"Anomaly US26: Marriage ({marriage['mid']}) between husband ({marriage['hid']}) and wife ({marriage['wid']}) has only one individual.")

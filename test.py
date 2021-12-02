@@ -1872,12 +1872,131 @@ class Tester(unittest.TestCase):
 
     def test_US26(self):
         self.db.build(rebuild=True)
-        ged_lines = """0 NOTE https://github.com/aPantera0/CS-555-Project
-        """
+        ged_lines = """0 @I1@ INDI
+            1 NAME Mark /Glasgow/
+            2 GIVN Mark
+            2 SURN Glasgow
+            2 _MARNM Glasgow
+            1 SEX M
+            1 BIRT
+            2 DATE 3 MAY 1942
+            1 FAMS @F1@
+            0 @I2@ INDI
+            1 NAME Lisa /Wilson/
+            2 GIVN Lisa
+            2 SURN Wilson
+            2 _MARNM Glasgow
+            1 SEX F
+            1 BIRT
+            2 DATE 8 APR 1942
+            1 FAMS @F2@
+            0 @I3@ INDI
+            1 NAME First /Last/
+            2 GIVN First
+            2 SURN Last
+            2 _MARNM Last
+            1 SEX M
+            1 BIRT
+            2 DATE 3 MAY 1942
+            1 FAMS @F4@
+            0 @I4@ INDI
+            1 NAME First2 /Last2/
+            2 GIVN First2
+            2 SURN Last2
+            2 _MARNM Last
+            1 SEX F
+            1 BIRT
+            2 DATE 3 MAY 1942
+            1 FAMS @F5@
+            0 @I5@ INDI
+            1 NAME Second /Test/
+            2 GIVN Second
+            2 SURN Test
+            2 _MARNM Test
+            1 SEX M
+            1 BIRT
+            2 DATE 3 MAY 1942
+            1 FAMS @F7@
+            0 @I6@ INDI
+            1 NAME Second2 /Test2/
+            2 GIVN Second2
+            2 SURN Test2
+            2 _MARNM Test2
+            1 SEX F
+            1 BIRT
+            2 DATE 3 MAY 1942
+            1 FAMS @F7@
+            0 @I7@ INDI
+            1 NAME Child /Noparent/
+            2 GIVN Child
+            2 SURN Noparent
+            2 _MARNM Noparent
+            1 SEX F
+            1 BIRT
+            2 DATE 3 MAY 2000
+            1 FAMS @F8@
+            0 @F1@ FAM
+            1 HUSB @I1@
+            1 WIFE 
+            1 MARR
+            2 DATE 3 AUG 1961
+            1 EVEN
+            2 TYPE Ending
+            1 _CURRENT N
+            0 @F2@ FAM
+            1 HUSB 
+            1 WIFE @I2@
+            1 MARR
+            2 DATE 3 AUG 1961
+            1 EVEN
+            2 TYPE Ending
+            1 _CURRENT N
+            0 @F3@ FAM
+            1 HUSB 
+            1 WIFE 
+            1 MARR
+            2 DATE 3 AUG 1961
+            1 EVEN
+            2 TYPE Ending
+            1 _CURRENT N
+            0 @F4@ FAM
+            1 HUSB @I3@
+            1 WIFE @L1@
+            1 MARR
+            2 DATE 3 AUG 1961
+            1 EVEN
+            2 TYPE Ending
+            1 _CURRENT N
+            0 @F5@ FAM
+            1 HUSB @L1@
+            1 WIFE @I4@ 
+            1 MARR
+            2 DATE 3 AUG 1961
+            1 EVEN
+            2 TYPE Ending
+            1 _CURRENT N
+            0 @F6@ FAM
+            1 HUSB @L1@
+            1 WIFE @L2@  
+            1 MARR
+            2 DATE 3 AUG 1961
+            1 EVEN
+            2 TYPE Ending
+            1 _CURRENT N
+            0 @F7@ FAM
+            1 HUSB @I5@
+            1 WIFE @I6@
+            1 CHIL @L7@
+            1 MARR
+            2 DATE 3 AUG 1961
+            1 EVEN
+            2 TYPE Ending
+            1 _CURRENT N
+            0 TRLR"""
         Ingest.ingest_lines(self.db, ged_lines.split('\n'))
         Display.populateAge(self.db)
-        #Display.correspondingEntries(self.db)
-        expectedPrintout = ""
+        Display.correspondingEntries(self.db)
+        expectedPrintout = "Anomaly US26: Marriage (@F1@) between husband (@I1@) and wife (None) has only one individual.\nAnomaly US26: Marriage (@F2@) between husband (None) and wife (@I2@) has only one individual.\nAnomaly US26: Marriage (@F3@) between husband (None) and wife (None) has only one individual."
         self.db.commit()
         self.assertEqual(expectedPrintout, self.capturedOutput.getvalue())
 

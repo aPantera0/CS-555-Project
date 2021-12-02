@@ -1996,14 +1996,13 @@ class Tester(unittest.TestCase):
         Ingest.ingest_lines(self.db, ged_lines.split('\n'))
         Display.populateAge(self.db)
         Display.correspondingEntries(self.db)
-        expectedPrintout = "Anomaly US26: Marriage (@F1@) between husband (@I1@) and wife (None) has only one individual.\nAnomaly US26: Marriage (@F2@) between husband (None) and wife (@I2@) has only one individual.\nAnomaly US26: Marriage (@F3@) between husband (None) and wife (None) has only one individual."
+        expectedPrintout = "Anomaly US 22: Family ID (@F4@) is not unique.\nAnomaly US 22: Family ID (@F5@) is not unique.\nAnomaly US 22: Family ID (@F6@) is not unique.\nAnomaly US26: Marriage (@F1@) between husband (@I1@) and wife (None) has only one individual.\nAnomaly US26: Marriage (@F2@) between husband (None) and wife (@I2@) has only one individual.\nAnomaly US26: Marriage (@F3@) between husband (None) and wife (None) has only one individual.\n"
         self.db.commit()
         self.assertEqual(expectedPrintout, self.capturedOutput.getvalue())
 
     def test_US27(self):
         self.db.build(rebuild=True)
-        ged_lines = """0 NOTE https://github.com/aPantera0/CS-555-Project
-        """
+        ged_lines = """0 NOTE https://github.com/aPantera0/CS-555-Project"""
         Ingest.ingest_lines(self.db, ged_lines.split('\n'))
         Display.populateAge(self.db)
         #Display.individualAges(self.db)
@@ -2014,11 +2013,133 @@ class Tester(unittest.TestCase):
     def test_US28(self):
         self.db.build(rebuild=True)
         ged_lines = """0 NOTE https://github.com/aPantera0/CS-555-Project
-        """
+            1 GEDC
+            2 VERS 5.5.1
+            0 @I1@ INDI
+            1 NAME Mark /Glasgow/
+            2 GIVN Mark
+            2 SURN Glasgow
+            2 _MARNM Glasgow
+            1 SEX M
+            1 BIRT
+            2 DATE 3 MAY 1942
+            1 DEAT Y
+            2 DATE 5 DEC 2010
+            1 FAMS @F1@
+            0 @I2@ INDI
+            1 NAME Lisa /Wilson/
+            2 GIVN Lisa
+            2 SURN Wilson
+            2 _MARNM Glasgow
+            1 SEX F
+            1 BIRT
+            2 DATE 8 APR 1942
+            1 DEAT Y
+            2 DATE 12 JAN 2021
+            1 FAMS @F1@
+            1 FAMS @F2@
+            0 @I3@ INDI
+            1 NAME Daniel /Glasgow/
+            2 GIVN Daniel
+            2 SURN Glasgow
+            2 _MARNM Glasgow
+            1 SEX M
+            1 BIRT
+            2 DATE 18 OCT 1973
+            1 FAMS @F3@
+            1 FAMS @F4@
+            1 FAMC @F1@
+            0 @I4@ INDI
+            1 NAME Annabelle /Glasgow/
+            2 GIVN Annabelle
+            2 SURN Glasgow
+            2 _MARNM Edison
+            1 SEX F
+            1 BIRT
+            2 DATE 30 JUL 1969
+            1 FAMC @F1@
+            0 @I5@ INDI
+            1 NAME Elizabeth /Redington/
+            2 GIVN Elizabeth
+            2 SURN Redington
+            2 _MARNM Glasgow
+            1 SEX F
+            1 BIRT
+            2 DATE 6 DEC 1968
+            1 FAMS @F4@
+            0 @I6@ INDI
+            1 NAME Michael /Glasgow/
+            2 GIVN Michael
+            2 SURN Glasgow
+            2 _MARNM Glasgow
+            1 SEX M
+            1 BIRT
+            2 DATE 6 OCT 2000
+            1 FAMC @F4@
+            0 @I7@ INDI
+            1 NAME Jennifer /Broome/
+            2 GIVN Jennifer
+            2 SURN Broome
+            2 _MARNM Glasgow
+            1 SEX F
+            1 BIRT
+            2 DATE 9 OCT 1985
+            1 FAMS @F3@
+            0 @I8@ INDI
+            1 NAME Maryann /Glasgow/
+            2 GIVN Maryann
+            2 SURN Glasgow
+            2 _MARNM Glasgow
+            1 SEX F
+            1 BIRT
+            2 DATE 13 DEC 2002
+            1 FAMC @F3@
+            0 @I9@ INDI
+            1 NAME Robert /Griffith/
+            2 GIVN Robert
+            2 SURN Griffith
+            2 _MARNM Griffith
+            1 SEX M
+            1 BIRT
+            2 DATE 8 JUL 1985
+            1 FAMS @F2@
+            0 @F1@ FAM
+            1 HUSB @I1@
+            1 WIFE @I2@
+            1 CHIL @I3@
+            1 CHIL @I4@
+            1 MARR
+            2 DATE 3 AUG 1961
+            1 EVEN
+            2 TYPE Ending
+            1 _CURRENT N
+            0 @F2@ FAM
+            1 HUSB @I9@
+            1 WIFE @I2@
+            1 MARR
+            2 DATE 2 OCT 2019
+            1 _CURRENT Y
+            0 @F3@ FAM
+            1 HUSB @I3@
+            1 WIFE @I7@
+            1 CHIL @I8@
+            1 MARR
+            2 DATE 4 NOV 2003
+            1 _CURRENT Y
+            0 @F4@ FAM
+            1 HUSB @I3@
+            1 WIFE @I5@
+            1 CHIL @I6@
+            1 MARR
+            2 DATE 9 SEP 1995
+            1 DIV
+            2 DATE 8 OCT 2002
+            1 _CURRENT N
+            0 TRLR"""
         Ingest.ingest_lines(self.db, ged_lines.split('\n'))
         Display.populateAge(self.db)
-        #Display.orderSiblingsAge(self.db)
-        expectedPrintout = ""
+        Display.orderSiblingsAge(self.db)
+        expectedPrintout = """US28 - List of siblings in families by decreasing age:\n    Family @F1@\n        Annabelle /Glasgow/ (@I4@) age 53\n        Daniel /Glasgow/ (@I3@) age 49\n    Family @F3@\n        Maryann /Glasgow/ (@I8@) age 19\n    Family @F4@\n        Michael /Glasgow/ (@I6@) age 22\n"""
         self.db.commit()
         self.assertEqual(expectedPrintout, self.capturedOutput.getvalue())
 
@@ -2111,14 +2232,13 @@ class Tester(unittest.TestCase):
         Ingest.ingest_lines(self.db, ged_lines.split('\n'))
         Display.populateAge(self.db)
         Display.listLivingMarried(self.db)
-        expectedPrintout = "US30 - List of all living married individuals:\nMark /Glasgow/ (@I1@)\nLisa /Wilson/ (@I2@)\nEnd of US30."
+        expectedPrintout = "US30 - List of all living married individuals:\nMark /Glasgow/ (@I1@)\nLisa /Wilson/ (@I2@)\nEnd of US30.\n"
         self.db.commit()
         self.assertEqual(expectedPrintout, self.capturedOutput.getvalue())
 
     def test_US31(self):
         self.db.build(rebuild=True)
-        ged_lines = """0 NOTE https://github.com/aPantera0/CS-555-Project
-        """
+        ged_lines = """0 NOTE https://github.com/aPantera0/CS-555-Project"""
         Ingest.ingest_lines(self.db, ged_lines.split('\n'))
         Display.populateAge(self.db)
         #Display.listLivingSingle(self.db)
@@ -2129,11 +2249,133 @@ class Tester(unittest.TestCase):
     def test_US32(self):
         self.db.build(rebuild=True)
         ged_lines = """0 NOTE https://github.com/aPantera0/CS-555-Project
-        """
+            1 GEDC
+            2 VERS 5.5.1
+            0 @I1@ INDI
+            1 NAME Mark /Glasgow/
+            2 GIVN Mark
+            2 SURN Glasgow
+            2 _MARNM Glasgow
+            1 SEX M
+            1 BIRT
+            2 DATE 3 MAY 1942
+            1 DEAT Y
+            2 DATE 5 DEC 2010
+            1 FAMS @F1@
+            0 @I2@ INDI
+            1 NAME Lisa /Wilson/
+            2 GIVN Lisa
+            2 SURN Wilson
+            2 _MARNM Glasgow
+            1 SEX F
+            1 BIRT
+            2 DATE 8 APR 1942
+            1 DEAT Y
+            2 DATE 12 JAN 2021
+            1 FAMS @F1@
+            1 FAMS @F2@
+            0 @I3@ INDI
+            1 NAME Daniel /Glasgow/
+            2 GIVN Daniel
+            2 SURN Glasgow
+            2 _MARNM Glasgow
+            1 SEX M
+            1 BIRT
+            2 DATE 30 JUL 1969
+            1 FAMS @F3@
+            1 FAMS @F4@
+            1 FAMC @F1@
+            0 @I4@ INDI
+            1 NAME Annabelle /Glasgow/
+            2 GIVN Annabelle
+            2 SURN Glasgow
+            2 _MARNM Edison
+            1 SEX F
+            1 BIRT
+            2 DATE 30 JUL 1969
+            1 FAMC @F1@
+            0 @I5@ INDI
+            1 NAME Elizabeth /Redington/
+            2 GIVN Elizabeth
+            2 SURN Redington
+            2 _MARNM Glasgow
+            1 SEX F
+            1 BIRT
+            2 DATE 6 DEC 1968
+            1 FAMS @F4@
+            0 @I6@ INDI
+            1 NAME Michael /Glasgow/
+            2 GIVN Michael
+            2 SURN Glasgow
+            2 _MARNM Glasgow
+            1 SEX M
+            1 BIRT
+            2 DATE 6 OCT 2000
+            1 FAMC @F4@
+            0 @I7@ INDI
+            1 NAME Jennifer /Broome/
+            2 GIVN Jennifer
+            2 SURN Broome
+            2 _MARNM Glasgow
+            1 SEX F
+            1 BIRT
+            2 DATE 9 OCT 1985
+            1 FAMS @F3@
+            0 @I8@ INDI
+            1 NAME Maryann /Glasgow/
+            2 GIVN Maryann
+            2 SURN Glasgow
+            2 _MARNM Glasgow
+            1 SEX F
+            1 BIRT
+            2 DATE 13 DEC 2002
+            1 FAMC @F3@
+            0 @I9@ INDI
+            1 NAME Robert /Griffith/
+            2 GIVN Robert
+            2 SURN Griffith
+            2 _MARNM Griffith
+            1 SEX M
+            1 BIRT
+            2 DATE 8 JUL 1985
+            1 FAMS @F2@
+            0 @F1@ FAM
+            1 HUSB @I1@
+            1 WIFE @I2@
+            1 CHIL @I3@
+            1 CHIL @I4@
+            1 MARR
+            2 DATE 3 AUG 1961
+            1 EVEN
+            2 TYPE Ending
+            1 _CURRENT N
+            0 @F2@ FAM
+            1 HUSB @I9@
+            1 WIFE @I2@
+            1 MARR
+            2 DATE 2 OCT 2019
+            1 _CURRENT Y
+            0 @F3@ FAM
+            1 HUSB @I3@
+            1 WIFE @I7@
+            1 CHIL @I8@
+            1 MARR
+            2 DATE 4 NOV 2003
+            1 _CURRENT Y
+            0 @F4@ FAM
+            1 HUSB @I3@
+            1 WIFE @I5@
+            1 CHIL @I6@
+            1 MARR
+            2 DATE 9 SEP 1995
+            1 DIV
+            2 DATE 8 OCT 2002
+            1 _CURRENT N
+            0 TRLR"""
         Ingest.ingest_lines(self.db, ged_lines.split('\n'))
         Display.populateAge(self.db)
-        #Display.listMultipleBirths(self.db)
-        expectedPrintout = ""
+        Display.listMultipleBirths(self.db)
+        expectedPrintout = """US32 - List of multiple births:\n    Family @F1@ had multiple birth at 1969-07-30:\n        Daniel /Glasgow/ (@I3@)\n        Annabelle /Glasgow/ (@I4@)\n"""
         self.db.commit()
         self.assertEqual(expectedPrintout, self.capturedOutput.getvalue())
 

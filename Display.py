@@ -5,6 +5,7 @@ import Database
 import schema
 import datetime
 from prettytable import PrettyTable
+from collections import defaultdict
 
 def yearsBetween(startDate: datetime.datetime, endDate: datetime.datetime = datetime.datetime.today().date()):
     """Returns the integer floor number of full years years between two dates.
@@ -689,7 +690,28 @@ def individualAges(db):
 def orderSiblingsAge(db):
     #US 28
     #List siblings in families by decreasing age, i.e. oldest siblings first
-    return 0
+    query = """
+    SELECT
+        i.iid, i.name, i.birthday, i.parentmarriage, i.age
+    FROM individuals i LEFT JOIN
+        marriages m ON i.parentmarriage=m.mid
+    WHERE 
+        m.mid IS NOT NULL
+    ORDER BY 
+        m.mid, i.birthday
+    """
+    print("US28 - List of siblings in families by decreasing age:")
+    marriages = {}
+    for i in db.query(query):
+        person = dict(zip(['iid', 'name', 'birthday', 'pm', 'age'], i))
+        if person['pm'] not in marriages:
+            marriages[person['pm']] = [person]
+        else: 
+            marriages[person['pm']].append(person)
+    for marriage in marriages:
+        print(f"    Family {marriage}")
+        for person in marriages[marriage]:
+            print(f"        {person['name']} ({person['iid']}) age {person['age']}")
 
 def listDeceased(db):
     #US 29
@@ -739,7 +761,28 @@ def listLivingSingle(db):
 def listMultipleBirths(db):
     #US 32
     #List all multiple births in a GEDCOM file
-    return 0
+    # Multiple births are like twins and triplets, they will have the same parentmarriage, and the same birthday
+    query = """
+    SELECT
+        i.iid, i.name, i.birthday, i.parentmarriage
+    FROM individuals i LEFT JOIN
+        individuals i2 ON i.birthday=i2.birthday AND i.parentmarriage=i2.parentmarriage AND i.iid!=i2.iid
+    WHERE 
+        i.parentmarriage IS NOT NULL AND i.iid IS NOT NULL AND i2.iid IS NOT NULL
+    ORDER BY 
+        i.parentmarriage, i.birthday, i.iid
+    """
+    # Multiple births can be uniquely identified by a birthday and parentmarriage
+    print("US32 - List of multiple births:")
+    mbs = defaultdict(set)
+    for i in db.query(query):
+        person = tuple(i)
+        mb = (person[2], person[3])
+        mbs[mb].add(person)
+    for mb in mbs:
+        print(f"    Family {mb[1]} had multiple birth at {mb[0]}:")
+        for person in sorted(list(mbs[mb])):
+            print(f"        {person[1]} ({person[0]})")
 
 def display(db):
     # Display SQL tables...
@@ -784,11 +827,11 @@ def display(db):
     # uniqueFirstNames(db)
     correspondingEntries(db)
     # individualAges(db)
-    # orderSiblingsAge(db)
-    # listDeceased(db)
-    # listLivingMarried(db)
+    orderSiblingsAge(db) # US28
+    listDeceased(db) # US29
+    listLivingMarried(db) # US30
     # listLivingSingle(db)
-    # listMultipleBirths(db)
+    listMultipleBirths(db) # US32
 
 if __name__ == "__main__":
     db = Database.Database(rebuild=False)

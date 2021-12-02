@@ -2238,11 +2238,37 @@ class Tester(unittest.TestCase):
 
     def test_US31(self):
         self.db.build(rebuild=True)
-        ged_lines = """0 NOTE https://github.com/aPantera0/CS-555-Project"""
+        ged_lines = """0 NOTE https://github.com/aPantera0/CS-555-Project
+1 GEDC
+2 VERS 5.5.1
+0 @I1@ INDI
+1 NAME Mark /Glasgow/
+2 GIVN Mark
+2 SURN Glasgow
+2 _MARNM Glasgow
+1 SEX M
+1 BIRT
+2 DATE 3 MAY 1942
+1 DEAT Y
+2 DATE 5 DEC 2110
+1 FAMS @F1@
+0 @I2@ INDI
+1 NAME Mark /Glasgow/
+2 GIVN Mark
+2 SURN Glasgow
+2 _MARNM Glasgow
+1 SEX M
+1 BIRT
+2 DATE 3 MAY 2090
+1 DEAT Y
+2 DATE 5 DEC 2110
+1 FAMS @F1@
+0 TRLR
+        """
         Ingest.ingest_lines(self.db, ged_lines.split('\n'))
         Display.populateAge(self.db)
         #Display.listLivingSingle(self.db)
-        expectedPrintout = ""
+        expectedPrintout = "US-31 - List of all living people over 30 who have never been married:\nMark /Glasgow/ (@I1@)\nEnd of US31.\n"
         self.db.commit()
         self.assertEqual(expectedPrintout, self.capturedOutput.getvalue())
 

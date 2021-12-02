@@ -13,13 +13,14 @@ TABLES['individuals'] = f"""CREATE TABLE IF NOT EXISTS `individuals` (
     `gender` CHAR,
     `birthday` DATE,
     `age` SMALLINT,
+    `currentAge` SMALLINT,
     `alive` varchar(5) DEFAULT 'True',
     `death` DATE,
     `parentmarriage` {ID_DATA_TYPE},
     PRIMARY KEY (`iid`, `name`)
     ) ENGINE=InnoDB
     """
-COLUMNS['individuals'] = ("iid", "name", "gender", "birthday", "age",
+COLUMNS['individuals'] = ("iid", "name", "gender", "birthday", "age", "currentAge",
     "alive", "death", "parentmarriage")
 
 TABLES['marriages'] = f"""CREATE TABLE IF NOT EXISTS `marriages` (

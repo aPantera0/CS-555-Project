@@ -32,6 +32,8 @@ def populateAge(db):
         if not person['age']:
             age = yearsBetween(person['birthday'], person['death'] if person['death'] else datetime.datetime.today().date())
             db.cursor.execute(f"UPDATE individuals SET age={age} WHERE iid='{person['iid']}'") # has to be a better way to do this
+            agenow = yearsBetween(person['birthday'],datetime.datetime.today().date())
+            db.cursor.execute(f"UPDATE individuals SET currentAge={agenow} WHERE iid='{person['iid']}'")
     db.commit()
 
 def displaySQLTables(db):
@@ -685,7 +687,9 @@ def correspondingEntries(db):
 def individualAges(db):
     #US 27
     #Include person's current age when listing individuals
-    return 0
+    
+    #Add in PopulateAge function
+    pass
 
 def orderSiblingsAge(db):
     #US 28
@@ -756,6 +760,17 @@ def listLivingMarried(db):
 def listLivingSingle(db):
     #US 31
     #List all living people over 30 who have never been married in a GEDCOM file
+    query="""
+        SELECT name, iid
+        FROM individuals
+        WHERE age > 30 AND ((gender = "F" AND iid not in (SELECT wid FROM marriages)) OR (gender="M" AND iid not in (SELECT hid FROM marriages)))
+    """
+    print("US-31 - List of all living people over 30 who have never been married:")
+    for i in db.query(query):
+        person = dict(zip(['name','iid'],i))
+        print(f"{person['name']} ({person['iid']})")
+    print("End of US31.")
+    
     return 0
 
 def listMultipleBirths(db):
@@ -803,7 +818,7 @@ def display(db):
     # Run user stories...
     # Sprint 2
     birthBeforeParentDeath(db)
-    marriageAfter14(db)
+    #marriageAfter14(db)
     noBigamy(db)
     parentsNotTooOld(db)
     siblingSpacing(db)

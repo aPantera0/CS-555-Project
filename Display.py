@@ -633,7 +633,7 @@ def correspondingEntries(db):
     #specified in family records should have corresponding entries in the corresponding
     #individual's records. I.e. the information in the individual and family records
     #should be consistent.
-    
+
     #for each family record, check to see if husband and wife exist
     #for each individual, if parent marriage is given make sure it is within marriages table
 
@@ -662,28 +662,29 @@ def correspondingEntries(db):
     query4 = """
         SELECT i.name, i.iid, i.parentmarriage
         FROM individuals i LEFT JOIN marriages m on i.parentmarriage = m.mid
-        WHERE i.parrentmarriage IS NOT NULL AND m.mid IS NULL
+        WHERE i.parentmarriage IS NOT NULL AND m.mid IS NULL
     """
-    us26violations = []
+
+    #finds all children that do not exist
+    query5 = """
+        
+    """
 
     for i in db.query(query1):
         marriage = dict(zip(['mid', 'hid', 'wid'], i))
-        us26violations.append(f"Anomaly US26: Marriage ({marriage['mid']}) between husband ({marriage['hid']}) and wife ({marriage['wid']}) has only one individual.")
+        print(f"Anomaly US26: Marriage ({marriage['mid']}) between husband ({marriage['hid']}) and wife ({marriage['wid']}) has only one individual.")
 
     for i in db.query(query2):
         marriage = dict(zip(['mid', 'hid'], i))
-        us26violations.append(f"Anomaly US26: Husband ({marriage['hid']}) in marriage ({marriage['hid']}) does not exist in individuals.")
+        print(f"Anomaly US26: Husband ({marriage['hid']}) in marriage ({marriage['hid']}) does not exist in individuals.")
 
     for i in db.query(query3):
         marriage = dict(zip(['mid', 'wid'], i))
-        us26violations.append(f"Anomaly US26: Wife ({marriage['wid']}) in marriage ({marriage['hid']}) does not exist in individuals.")
+        print(f"Anomaly US26: Wife ({marriage['wid']}) in marriage ({marriage['hid']}) does not exist in individuals.")
 
     for i in db.query(query4):
         child = dict(zip(['name', 'iid', 'parentmarriage'], i))
-        us26violations.append(f"Anomaly US26: {child['name']} ({child['iid']}) is the child of marriage ({child['parentmarriage']}), which does not exist in marriages.")
-
-    for i in us26violations:
-        print(us26violations[i])
+        print(f"Anomaly US26: {child['name']} ({child['iid']}) is the child of marriage ({child['parentmarriage']}), which does not exist in marriages.")
 
 def individualAges(db):
     #US 27
@@ -785,11 +786,11 @@ def display(db):
 
     # Run user stories...
     # Sprint 4
-    uniqueFirstNames(db)
-    # correspondingEntries(db)
+    # uniqueFirstNames(db)
+    correspondingEntries(db)
     # individualAges(db)
     # orderSiblingsAge(db)
-    listDeceased(db)
+    # listDeceased(db)
     # listLivingMarried(db)
     # listLivingSingle(db)
     # listMultipleBirths(db)
